@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>E-VoiceSpartan — File Complaint</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div style="display: flex; gap: 16px; align-items: center">
+      <div id="menuBtn" style="cursor: pointer; font-size: 22px;">☰</div>
+      <div class="brand">E-VoiceSpartan</div>
+    </div>
+    <nav class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#file-complaint" class="active">File Complaint</a>
+      <a href="#suggestion">Submit Suggestion</a>
+      <button class="logout">Logout</button>
+    </nav>
+  </header>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <a id="profileToggle" style="display: flex; align-items: center">
+      <span class="arrow">▶</span> My Profile
+    </a>
+    <div id="profileSub" class="sub-links">
+      <a href="#">Personal Information</a>
+      <a href="#">My Submissions</a>
+    </div>
+
+    <a id="settingsToggle" style="display: flex; align-items: center">
+      <span class="arrow">▶</span> Settings
+    </a>
+    <div id="settingsSub" class="sub-links">
+      <a href="#">Account Setting</a>
+      <a href="#">Anonymity Setting</a>
+    </div>
+
+    <hr class="sidebar-divider" />
+    <a href="#">FAQs</a>
+    <hr class="sidebar-divider" />
+    <a href="#">About Us</a>
+    <a href="#">Contact Us</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="file-complaint-wrap" id="file-complaint">
+    <div class="steps">
+      <div class="step step-1 active">
+        <div class="circle">1</div>
+        <p>Category</p>
+      </div>
+      <div class="step step-2">
+        <div class="circle">2</div>
+        <p>Description</p>
+      </div>
+      <div class="step step-3">
+        <div class="circle">3</div>
+        <p>Attach File</p>
+      </div>
+      <div class="step step-4">
+        <div class="circle">4</div>
+        <p>Review</p>
+      </div>
+      <div class="step step-5">
+        <div class="circle">5</div>
+        <p>Confirmation</p>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <section id="step1">
+      <div class="categories">
+        <div class="cat-col">
+          <button class="category-btn">Academic Concerns</button>
+          <button class="category-btn">Campus Cleanliness &amp; Environment</button>
+          <button class="category-btn">Facilities &amp; Equipment</button>
+          <button class="category-btn">Health &amp; Safety</button>
+        </div>
+        <div class="cat-col">
+          <button class="category-btn">Administrative Services</button>
+          <button class="category-btn">Academic Services</button>
+          <button class="category-btn">Student Services</button>
+          <button class="category-btn">Staff / Faculty</button>
+        </div>
+      </div>
+
+      <div class="others-wrap">
+        <button class="category-btn others">Others / General Concern</button>
+      </div>
+
+      <div class="controls">
+        <span></span>
+        <button id="nextBtn" class="btn">Next</button>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section id="step2" class="step2-wrap">
+      <div class="desc-box" id="descBox"></div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section id="step3" class="step3-wrap">
+      <div class="upload-box" id="uploadBox"></div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section id="step4" class="step4-wrap">
+      <div class="review-wrap" id="reviewWrap"></div>
+    </section>
+
+    <!-- STEP 5 -->
+    <section id="step5" class="step5-wrap">
+      <div class="confirm-box">
+        <p>
+          Please review all the details of your complaint before submitting.<br />
+          Once submitted, you will no longer be able to edit your entry.
+        </p>
+        <label>
+          <input type="checkbox" id="confirmCheck" />
+          I have reviewed and confirmed that all the information I provided is correct.
+        </label>
+
+        <div class="confirm-controls">
+          <button id="backTo4" class="btn">← Back</button>
+          <button id="submitBtn" class="btn submit-btn">Submit</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    Leading Innovations, Transforming Lives, Building the Nation
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>         
