@@ -1,0 +1,99 @@
+
+.otp-box {
+  background: rgba(214, 214, 214, 0.95);
+  border-radius: 12px;
+  padding: 25px;
+  width: 360px;
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  color: #111;
+}
+
+.otp-note {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.otp-option-row .otp-option {
+  padding: 10px 8px;
+  font-weight: 600;
+}
+
+.otp-form .input-group {
+  display: flex !important;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.otp-form .form-control {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  width: auto !important;
+}
+
+.request-btn,
+.send-btn {
+  flex: 0 0 auto !important;
+  white-space: nowrap;
+  padding: 8px 16px !important;
+  margin-bottom: 10px !important;
+  width: auto !important;
+  min-width: fit-content !important;
+}
+
+.btn-sent {
+  background: linear-gradient(180deg, rgba(211, 75, 75, 0.95), rgba(180, 40, 40, 0.9)) !important;
+  border-color: rgba(180, 40, 40, 0.9) !important;
+  padding: 8px 16px !important;
+  margin-bottom: 10px !important;
+  color: #fff !important;
+  opacity: 0.92 !important;
+}
+
+.btn-sent[disabled] {
+  cursor: not-allowed;
+  opacity: 0.7 !important;
+}
+
+.otp-placeholder .input-group {
+  margin-top: 8px;
+}
+
+.otp-placeholder .send-btn {
+  background: #28a745;
+  border-color: #28a745;
+  color: #fff;
+}
+
+.back-login-link {
+  color: #d34b4b;
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid #d34b4b;
+  padding-bottom: 2px;
+}
+
+.back-login-link:hover {
+  color: #8b2626;
+  border-bottom-color: #8b2626;
+}
+
+.otp-enter {
+  animation: otpFade 0.3s ease both;
+}
+
+@keyframes otpFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
