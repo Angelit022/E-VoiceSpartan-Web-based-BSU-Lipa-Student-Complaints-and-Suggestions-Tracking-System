@@ -1,41 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>E-VoiceSpartan</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-Voice Spartan</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="navbar">
-    <div class="brand" id="menu-btn">☰ E-VoiceSpartan</div>
-    <div class="menu">
-      <a href="#home" class="nav-link active">Home</a>
-      <a href="#complaint" class="nav-link">File Complaint</a>
-      <a href="#suggestion" class="nav-link">Submit Suggestion</a>
-      <a href="#logout" class="logout">Logout</a>
-    </div>
-  </div>
 
-  <div id="sidebar" class="sidebar">
-    <a id="profile-toggle"><span class="arrow">▶</span>My Profile</a>
-    <div id="profile-sub" class="sub-links">
-      <a href="#">Personal Information</a>
-      <a href="#">My Submissions</a>
-    </div>
+  <!-- Navbar -->
+  <?php include 'components/navbar.html'; ?>
 
-    <a id="settings-toggle"><span class="arrow">▶</span>Settings</a>
-    <div id="settings-sub" class="sub-links">
-      <a href="#">Account Setting</a>
-      <a href="#">Anonymity Setting</a>
-    </div>
-
-    <hr>
-    <a href="#">FAQs</a>
-    <hr>
-    <a href="#">About Us</a>
-    <a href="#">Contact Us</a>
-  </div>
+  <!-- Sidebar -->
+  <?php include 'components/sidebar.html'; ?>
 
   <div class="content" id="main-content">
     <section id="home" class="welcome-section">
@@ -55,6 +32,7 @@
         <p>Our mission is to create an open and secure platform where BSU Lipa students can freely express their concerns, complaints, and suggestions.</p>
         <p>Through this system, we aim to strengthen communication between students and the administration, promote transparency, and ensure that every voice is heard and valued.</p>
       </div>
+
       <div class="mv-box">
         <h3>Vision</h3>
         <p>We envision a university community where every student's voice contributes to positive change. Through this Complaints and Suggestions Tracking System, BSU Lipa strives to become a model of transparency, accountability, and student empowerment — a place where feedback drives growth, innovation, and continuous improvement for the benefit of all.</p>
@@ -64,6 +42,14 @@
     <div class="footer">Leading Innovations, Transforming Lives, Building the Nation</div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- Modal -->
+  <div id="info-modal">
+    <div class="modal-inner">
+      <span id="close-modal">&times;</span>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="js/script.js"></script>
 </body>
 </html>
