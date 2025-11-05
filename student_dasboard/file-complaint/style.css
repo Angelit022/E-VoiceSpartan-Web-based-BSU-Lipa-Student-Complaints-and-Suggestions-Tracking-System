@@ -1,0 +1,114 @@
+:root { --accent: #b30000; }
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+  scroll-behavior: smooth;
+}
+body {
+  background: url("https://i.pinimg.com/736x/5c/ae/78/5cae78039b21c4cdbcee2349b836a810.jpg") no-repeat center center fixed;
+  background-size: cover;
+  background-color: rgba(255,255,255,0.45);
+}
+/* NAVBAR */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 36px;
+  background: rgba(180,180,180,0.8);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.brand {
+  font-weight: 700;
+  font-size: 20px;
+  cursor: pointer;
+}
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+.nav-links a {
+  color: #000;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+.nav-links a:hover {
+  background: rgba(255,255,255,0.6);
+}
+.logout {
+  border: 2px solid var(--accent);
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  cursor: pointer;
+}
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  height: 100%;
+  width: 250px;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  transition: left .3s ease;
+  z-index: 90;
+  padding-top: 60px;
+}
+.sidebar.open { left: 0; }
+.sidebar a {
+  display: block;
+  padding: 12px 24px;
+  color: #000;
+  text-decoration: none;
+  font-size: 16px;
+  cursor: pointer;
+}
+.sub-links {
+  display: none;
+  padding-left: 16px;
+}
+.arrow {
+  margin-right: 8px;
+  font-weight: 700;
+}
+/* MAIN WRAP */
+.file-complaint-wrap {
+  background-color: rgba(255,255,255,0.45);
+  min-height: calc(100vh - 70px);
+  padding: 48px 8%;
+  box-sizing: border-box;
+  z-index: 30;
+}
+/* STEPS */
+.steps {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 28px;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10%;
+  box-sizing: border-box;
+}
+.steps::before {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 2px;
+  background: white;
+  transform: translateY(-50%);
+}
+/* (rest of CSS unchanged — keep all styles exactly the same) */
