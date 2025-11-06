@@ -18,12 +18,11 @@
       const $ = window.jQuery
       const Swal = window.Swal
 
-const PROJECT_BASE = "/E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System/signup_login";
-
-const sendSmsUrl = `${PROJECT_BASE}/otp/sms_otp/send_sms_otp.php`;
-const verifySmsUrl = `${PROJECT_BASE}/otp/sms_otp/verify_sms_otp.php`;
-const sendGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/send_gmail_otp.php`;
-const verifyGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/verify_gmail_otp.php`;
+      // This automatically handles folder names with spaces and URL encoding
+      const sendSmsUrl = `otp/sms_otp/send_sms_otp.php`
+      const verifySmsUrl = `otp/sms_otp/verify_sms_otp.php`
+      const sendGmailUrl = `otp/gmail_otp/send_gmail_otp.php`
+      const verifyGmailUrl = `otp/gmail_otp/verify_gmail_otp.php`
 
       console.log(
         "[v0] OTP URLs - SMS Send:",
@@ -40,10 +39,10 @@ const verifyGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/verify_gmail_otp.php`;
         return /^(\+63|0)?9\d{9}$/.test((phone || "").replace(/\s+/g, ""))
       }
       function validateGmail(email) {
-        return /^[a-zA-Z0-9._%-]+@gmail\.com$/.test((email || "").trim())
-      }
-      function validateEmail(email) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((email || "").trim())
+        const trimmedEmail = (email || "").trim()
+        const isGmail = /^[a-zA-Z0-9._%-]+@gmail\.com$/.test(trimmedEmail)
+        const isBatStateU = /^[a-zA-Z0-9._%-]+@g\.batstate-u\.edu\.ph$/.test(trimmedEmail)
+        return isGmail || isBatStateU
       }
       function validateOTP(otp) {
         return /^\d{6}$/.test((otp || "").trim())
@@ -114,11 +113,11 @@ const verifyGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/verify_gmail_otp.php`;
             })
           })
         } else if (formType === "gmail") {
-          if (!validateEmail(inputVal)) {
+          if (!validateGmail(inputVal)) {
             Swal.fire({
               icon: "warning",
               title: "Invalid Email",
-              text: "Please enter a valid email address.",
+              text: "Please enter a valid Gmail or GSuite email address (e.g., user@gmail.com or user@company.com).",
             })
             return
           }
@@ -189,7 +188,7 @@ const verifyGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/verify_gmail_otp.php`;
                   text: res.message,
                   allowOutsideClick: false,
                 }).then(() => {
-                  window.location.href = res.redirect || "../main_page/homepage.php"
+                  window.location.href = res.redirect
                 })
               } else {
                 Swal.fire({ icon: "error", title: "Verification Failed", text: res.message })
@@ -219,7 +218,7 @@ const verifyGmailUrl = `${PROJECT_BASE}/otp/gmail_otp/verify_gmail_otp.php`;
                   text: res.message,
                   allowOutsideClick: false,
                 }).then(() => {
-                  window.location.href = res.redirect || "../main_page/homepage.php"
+                  window.location.href = res.redirect
                 })
               } else {
                 Swal.fire({ icon: "error", title: "Verification Failed", text: res.message })

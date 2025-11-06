@@ -26,8 +26,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $studentService = new StudentService();
     $result = $studentService->registerStudent($first_name, $middle_initial, $last_name, $email, $student_id, $phone_number, $password);
-    
+
+    if (!$result['status']) {
+        error_log("SIGNUP ERROR: " . $result['message']); // 👈 add this line
+    }
+
     echo json_encode($result);
+
 } else {
     echo json_encode(['status' => false, 'message' => 'Invalid request method']);
 }

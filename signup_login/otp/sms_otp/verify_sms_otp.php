@@ -57,6 +57,7 @@ if ($otp_record['otp_code'] !== $otp_input) {
     exit;
 }
 
+$_SESSION['user_id'] = $student_id;
 $_SESSION['logged_in'] = true;
 
 $delete_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE id = ?");

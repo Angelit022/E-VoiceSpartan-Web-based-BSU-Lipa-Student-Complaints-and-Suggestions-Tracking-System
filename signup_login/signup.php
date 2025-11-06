@@ -21,20 +21,23 @@
   <section class="section" id="signup-section">
     <div class="login-box"> 
       <h2>Sign Up</h2>
-      <form id="signupForm" method="POST" action="signup_handler.php">
-        <div class="signup-row">
-          <input type="text" name="first_name" placeholder="First Name" required>
-          <input type="text" name="middle_initial" class="mi" placeholder="M.I" maxlength="1">
-          <input type="text" name="last_name" placeholder="Last Name" required>
-        </div>
-        <input type="email" name="email" placeholder="GSuite account" required>
-        <input type="text" name="student_id" placeholder="Student ID" required>
-        <input type="tel" name="phone_number" placeholder="Contact Number" required>
-        <input type="password" name="password" placeholder="Password (minimum 5 characters)" required minlength="5">
-        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-        <button type="submit">Sign Up</button>
-        <p>Already have an account? <a href="login.php" id="backToLogin">Login here</a></p>
-      </form>
+<form id="signupForm" method="POST" action="signup_handler.php" autocomplete="on">
+  <div class="signup-row">
+    <input type="text" name="first_name" placeholder="First Name" required autocomplete="given-name">
+    <input type="text" name="middle_initial" class="mi" placeholder="M.I" maxlength="1" autocomplete="additional-name">
+    <input type="text" name="last_name" placeholder="Last Name" required autocomplete="family-name">
+  </div>
+
+  <input type="email" name="email" placeholder="GSuite account" required autocomplete="email">
+  <input type="text" name="student_id" placeholder="Student ID" required autocomplete="off">
+  <input type="tel" name="phone_number" placeholder="Contact Number" required autocomplete="tel">
+  <input type="password" name="password" placeholder="Password (minimum 5 characters)" required minlength="5" autocomplete="new-password">
+  <input type="password" name="confirm_password" placeholder="Confirm Password" required autocomplete="new-password">
+  
+  <button type="submit">Sign Up</button>
+  <p>Already have an account? <a href="login.php" id="backToLogin">Login here</a></p>
+</form>
+
     </div>
   </section>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

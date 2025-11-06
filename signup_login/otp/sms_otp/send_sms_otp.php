@@ -95,7 +95,7 @@ if ($httpCode === 200 && $response) {
         echo json_encode(['status' => true, 'message' => 'OTP sent successfully']);
     } else {
         error_log("[send_sms_otp] API Error: " . json_encode($res));
-        echo json_encode(['status' => false, 'message' => 'Failed to send OTP']);
+        echo json_encode(['status' => false, 'message' => 'Failed to ssend OTP']);
     }
 } else {
     error_log("[send_sms_otp] HTTP Code: $httpCode Response: $response");

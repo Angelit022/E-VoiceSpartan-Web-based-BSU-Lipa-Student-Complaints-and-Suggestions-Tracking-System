@@ -1,0 +1,103 @@
+<?php
+class Suggestion {
+    private $conn;
+    private $bannedWords = [
+        'fuck', 'shit', 'bitch', 'asshole', 'idiot', 'stupid',
+        'offensive', 'inappropriate', 'vulgar'
+    ];
+
+    public function __construct(mysqli $conn) {
+        $this->conn = $conn;
+    }
+
+    public function validate(array $data, $student_id) {
+        $required = ['category', 'title', 'description'];
+        foreach ($required as $field) {
+            if (!isset($data[$field]) || trim($data[$field]) === '') {
+                return ['success' => false, 'message' => ucfirst($field) . " is required."];
+            }
+        }
+
+        if (mb_strlen($data['title']) > 255) {
+            return ['success' => false, 'message' => "Title must be 255 characters or less."];
+        }
+
+        if (mb_strlen($data['description']) < 10) {
+            return ['success' => false, 'message' => "Description must be at least 10 characters."];
+        }
+
+        if (!$data['is_anonymous']) {
+            if (empty($student_id)) {
+                return ['success' => false, 'message' => "Student session not found."];
+            }
+        }
+
+        return ['success' => true, 'message' => 'OK'];
+    }
+
+    public function create(array $data, string $student_id = null) {
+        $category = trim($data['category']);
+        $title = $this->filterBannedWords(trim($data['title']));
+        $description = $this->filterBannedWords(trim($data['description']));
+        $is_anonymous = !empty($data['is_anonymous']) ? 1 : 0;
+        
+        // Get the default "Pending" status_id from the status table
+        $statusSql = "SELECT status_id FROM status WHERE status_name = 'Pending' LIMIT 1";
+        $statusResult = $this->conn->query($statusSql);
+        if (!$statusResult || $statusResult->num_rows === 0) {
+            return ['success' => false, 'message' => 'Default status "Pending" not found in database. Please contact administrator.'];
+        }
+        $statusRow = $statusResult->fetch_assoc();
+        $status_id = $statusRow['status_id'];
+
+        // student_id should be "s" (string), not "i" (integer) since student_id is VARCHAR in database
+        $sql = "INSERT INTO suggestion (student_id, category, title, description, status_id, is_anonymous)
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            return ['success' => false, 'message' => "Prepare failed: " . $this->conn->error];
+        }
+
+        $studentVal = $student_id !== null ? $student_id : '';
+
+        // 6 parameters: student_id(s), category(s), title(s), description(s), status_id(i), is_anonymous(i)
+        $stmt->bind_param(
+            "ssssii",
+            $studentVal,
+            $category,
+            $title,
+            $description,
+            $status_id,
+            $is_anonymous
+        );
+
+        if ($stmt->execute()) {
+            $insertId = $stmt->insert_id;
+            $stmt->close();
+            return ['success' => true, 'message' => 'Suggestion created', 'suggestion_id' => $insertId];
+        } else {
+            $err = $stmt->error;
+            $stmt->close();
+            return ['success' => false, 'message' => 'Insert failed: ' . $err];
+        }
+    }
+
+    public function containsBannedWords(string $text): bool {
+        $lowerText = strtolower($text);
+        foreach ($this->bannedWords as $word) {
+            if (strpos($lowerText, strtolower($word)) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function filterBannedWords(string $text): string {
+        $lowerText = strtolower($text);
+        foreach ($this->bannedWords as $word) {
+            $text = preg_replace('/\b' . preg_quote($word, '/') . '\b/i', str_repeat('*', strlen($word)), $text);
+        }
+        return $text;
+    }
+}
+?>
