@@ -13,6 +13,7 @@ class Attachment {
         }
     }
 
+     //Validate file before upload
     public function validateFile($file) {
         if (!isset($file['tmp_name']) || empty($file['tmp_name'])) {
             return ['success' => false, 'message' => 'No file selected'];
@@ -33,25 +34,32 @@ class Attachment {
         return ['success' => true, 'message' => 'OK'];
     }
 
+     //Save file and store in database
+
     public function saveAttachment($file, $complaint_id) {
+        // Validate file
         $validation = $this->validateFile($file);
         if (!$validation['success']) {
             return $validation;
         }
 
+        // Generate unique filename
         $timestamp = time();
         $random = bin2hex(random_bytes(4));
         $filename = "{$complaint_id}_{$timestamp}_{$random}_" . basename($file['name']);
         $filepath = $this->uploadDir . $filename;
 
+        // Move uploaded file
         if (!move_uploaded_file($file['tmp_name'], $filepath)) {
             return ['success' => false, 'message' => 'Failed to upload file'];
         }
 
+        // Get MIME type
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
         $mimeType = finfo_file($finfo, $filepath);
         finfo_close($finfo);
 
+        // Store in database
         $relativePath = 'uploads/complaints/' . $filename;
         $sql = "INSERT INTO attachment (complaint_id, file_path, file_type, uploaded_at) VALUES (?, ?, ?, NOW())";
         $stmt = $this->conn->prepare($sql);
@@ -65,12 +73,14 @@ class Attachment {
             return ['success' => true, 'message' => 'File uploaded successfully', 'filename' => $filename, 'filepath' => $relativePath];
         } else {
             $stmt->close();
-
+            // Delete the uploaded file if database insert fails
             @unlink($filepath);
             return ['success' => false, 'message' => 'Failed to save file information'];
         }
     }
 
+
+     // Get attachments for a complaint
     public function getAttachmentsByComplaintId($complaint_id) {
         $sql = "SELECT attachment_id, file_path, file_type, uploaded_at FROM attachment WHERE complaint_id = ? ORDER BY uploaded_at DESC";
         $stmt = $this->conn->prepare($sql);

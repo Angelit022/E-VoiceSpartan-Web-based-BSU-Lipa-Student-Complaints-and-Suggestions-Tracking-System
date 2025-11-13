@@ -1,9 +1,4 @@
-/**
- * Reusable Components Styling
- * Buttons, Forms, Cards, etc.
- */
 
-/* ===== BUTTONS ===== */
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
@@ -261,7 +256,6 @@ input[type="radio"] {
   align-items: center;
 }
 
-/* Fixed step connector line to properly extend from left to right without gaps */
 .step:not(:last-child)::after {
   content: "";
   position: absolute;
@@ -323,7 +317,6 @@ input[type="radio"] {
   font-weight: 700;
 }
 
-/* ===== TOGGLE SWITCH (for anonymous checkbox) ===== */
 .toggle-checkbox {
   display: none;
 }
@@ -367,7 +360,6 @@ input[type="radio"] {
   transition: left 0.3s ease;
 }
 
-/* Changed toggle switch color from primary to red when checked */
 .toggle-checkbox:checked + .toggle-label {
   background: rgba(196, 30, 58, 0.1);
   border-color: var(--color-red);

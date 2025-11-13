@@ -18,25 +18,14 @@
       const $ = window.jQuery
       const Swal = window.Swal
 
-      // This automatically handles folder names with spaces and URL encoding
       const sendSmsUrl = `otp/sms_otp/send_sms_otp.php`
       const verifySmsUrl = `otp/sms_otp/verify_sms_otp.php`
       const sendGmailUrl = `otp/gmail_otp/send_gmail_otp.php`
       const verifyGmailUrl = `otp/gmail_otp/verify_gmail_otp.php`
-
-      console.log(
-        "[v0] OTP URLs - SMS Send:",
-        sendSmsUrl,
-        "SMS Verify:",
-        verifySmsUrl,
-        "Gmail Send:",
-        sendGmailUrl,
-        "Gmail Verify:",
-        verifyGmailUrl,
-      )
+      const validateUrl = `otp/validate_contact.php`
 
       function validatePhone(phone) {
-        return /^(\+63|0)?9\d{9}$/.test((phone || "").replace(/\s+/g, ""))
+        return /^(0|(\+63))?9\d{9}$/.test((phone || "").replace(/\s+/g, ""))
       }
       function validateGmail(email) {
         const trimmedEmail = (email || "").trim()
@@ -78,84 +67,148 @@
             return
           }
 
-          Swal.fire({
-            icon: "question",
-            title: "Send OTP?",
-            text: `An OTP will be sent to ${inputVal}.`,
-            showCancelButton: true,
-            confirmButtonText: "Send",
-          }).then((r) => {
-            if (!r.isConfirmed) return
-            $btn.prop("disabled", true).text("Sending...")
+          console.log("[v0] SMS validation - calling validateUrl:", validateUrl)
+          $.ajax({
+            url: validateUrl,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ contact_type: "phone", contact_value: inputVal }),
+            dataType: "json",
+            success: (validation) => {
+              console.log("[v0] SMS validation response:", validation)
+              if (!validation.status) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Invalid Phone",
+                  text: validation.message,
+                })
+                return
+              }
 
-            console.log("[v0] Sending SMS OTP request to:", sendSmsUrl)
-            $.ajax({
-              url: sendSmsUrl,
-              method: "POST",
-              data: { phone_number: inputVal },
-              dataType: "json",
-              success: (res) => {
-                console.log("[v0] SMS OTP Response:", res)
-                if (res.status) {
-                  Swal.fire({ icon: "success", title: "OTP Sent", text: res.message })
-                  form.find(".otp-placeholder").slideDown(200).show()
-                  $btn.text("Sent")
-                } else {
-                  Swal.fire({ icon: "error", title: "Failed", text: res.message })
-                  $btn.prop("disabled", false).text("Request OTP")
-                }
-              },
-              error: (xhr, status, error) => {
-                console.log("[v0] SMS AJAX Error:", xhr.status, xhr.responseText)
-                Swal.fire({ icon: "error", title: "Error", text: "Server error sending OTP. Status: " + xhr.status })
-                $btn.prop("disabled", false).text("Request OTP")
-              },
-            })
+              // Phone is valid, proceed with OTP request
+              Swal.fire({
+                icon: "question",
+                title: "Send OTP?",
+                text: `An OTP will be sent to ${inputVal}.`,
+                showCancelButton: true,
+                confirmButtonText: "Send",
+              }).then((r) => {
+                if (!r.isConfirmed) return
+                $btn.prop("disabled", true).text("Sending...")
+
+                $.ajax({
+                  url: sendSmsUrl,
+                  method: "POST",
+                  data: { phone_number: inputVal },
+                  dataType: "json",
+                  success: (res) => {
+                    console.log("[v0] SMS send response:", res)
+                    if (res.status) {
+                      Swal.fire({ icon: "success", title: "OTP Sent", text: res.message })
+                      form.find(".otp-placeholder").slideDown(200).show()
+                      $btn.text("Sent")
+                    } else {
+                      Swal.fire({ icon: "error", title: "Failed", text: res.message })
+                      $btn.prop("disabled", false).text("Request OTP")
+                    }
+                  },
+                  error: (xhr) => {
+                    console.error("[v0] SMS send error:", xhr)
+                    Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Server error sending OTP. Status: " + xhr.status,
+                    })
+                    $btn.prop("disabled", false).text("Request OTP")
+                  },
+                })
+              })
+            },
+            error: (xhr) => {
+              console.error("[v0] SMS validation error:", xhr)
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Validation failed. Please check your information and try again.",
+              })
+            },
           })
         } else if (formType === "gmail") {
           if (!validateGmail(inputVal)) {
             Swal.fire({
               icon: "warning",
               title: "Invalid Email",
-              text: "Please enter a valid Gmail or GSuite email address (e.g., user@gmail.com or user@company.com).",
+              text: "Please enter a valid Gsuite Account.",
             })
             return
           }
 
-          Swal.fire({
-            icon: "question",
-            title: "Send OTP?",
-            text: `An OTP will be sent to ${inputVal}.`,
-            showCancelButton: true,
-            confirmButtonText: "Send",
-          }).then((r) => {
-            if (!r.isConfirmed) return
-            $btn.prop("disabled", true).text("Sending...")
+          console.log("[v0] Gmail validation - calling validateUrl:", validateUrl)
+          $.ajax({
+            url: validateUrl,
+            method: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ contact_type: "email", contact_value: inputVal }),
+            dataType: "json",
+            success: (validation) => {
+              console.log("[v0] Gmail validation response:", validation)
+              if (!validation.status) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "Invalid Email",
+                  text: validation.message,
+                })
+                return
+              }
 
-            console.log("[v0] Sending Gmail OTP request to:", sendGmailUrl)
-            $.ajax({
-              url: sendGmailUrl,
-              method: "POST",
-              contentType: "application/json",
-              data: JSON.stringify({ email: inputVal }),
-              dataType: "json",
-              success: (res) => {
-                console.log("[v0] Gmail OTP Response:", res)
-                if (res.status) {
-                  Swal.fire({ icon: "success", title: "OTP Sent", text: res.message })
-                  form.find(".otp-placeholder").slideDown(200).show()
-                  $btn.text("Sent")
-                } else {
-                  Swal.fire({ icon: "error", title: "Failed", text: res.message })
-                  $btn.prop("disabled", false).text("Request OTP")
-                }
-              },
-              error: (xhr, status, error) => {
-                console.log("[v0] Gmail AJAX Error:", xhr.status, xhr.responseText)
-                Swal.fire({ icon: "error", title: "Error", text: "Server error sending OTP. Status: " + xhr.status })
-                $btn.prop("disabled", false).text("Request OTP")
-              },
-            })
+              // Email is valid, proceed with OTP request
+              Swal.fire({
+                icon: "question",
+                title: "Send OTP?",
+                text: `An OTP will be sent to ${inputVal}.`,
+                showCancelButton: true,
+                confirmButtonText: "Send",
+              }).then((r) => {
+                if (!r.isConfirmed) return
+                $btn.prop("disabled", true).text("Sending...")
+
+                $.ajax({
+                  url: sendGmailUrl,
+                  method: "POST",
+                  contentType: "application/json",
+                  data: JSON.stringify({ email: inputVal }),
+                  dataType: "json",
+                  success: (res) => {
+                    console.log("[v0] Gmail send response:", res)
+                    if (res.status) {
+                      Swal.fire({ icon: "success", title: "OTP Sent", text: res.message })
+                      form.find(".otp-placeholder").slideDown(200).show()
+                      $btn.text("Sent")
+                    } else {
+                      Swal.fire({ icon: "error", title: "Failed", text: res.message })
+                      $btn.prop("disabled", false).text("Request OTP")
+                    }
+                  },
+                  error: (xhr) => {
+                    console.error("[v0] Gmail send error:", xhr)
+                    Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Server error sending OTP. Status: " + xhr.status,
+                    })
+                    $btn.prop("disabled", false).text("Request OTP")
+                  },
+                })
+              })
+            },
+            error: (xhr) => {
+              console.error("[v0] Gmail validation error:", xhr)
+              Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "Validation failed. Please check your information and try again.",
+              })
+            },
           })
         }
       })
@@ -174,13 +227,13 @@
 
         if (formType === "sms") {
           $btn.prop("disabled", true).text("Verifying...")
-          console.log("[v0] Verifying SMS OTP at:", verifySmsUrl)
           $.ajax({
             url: verifySmsUrl,
             method: "POST",
             data: { otp: otpVal },
             dataType: "json",
             success: (res) => {
+              console.log("[v0] SMS verify response:", res)
               if (res.status) {
                 Swal.fire({
                   icon: "success",
@@ -195,15 +248,14 @@
                 $btn.prop("disabled", false).text("Verify OTP")
               }
             },
-
             error: () => {
+              console.error("[v0] SMS verify error")
               Swal.fire({ icon: "error", title: "Error", text: "Verification failed. Try again." })
               $btn.prop("disabled", false).text("Verify OTP")
             },
           })
         } else if (formType === "gmail") {
           $btn.prop("disabled", true).text("Verifying...")
-          console.log("[v0] Verifying Gmail OTP at:", verifyGmailUrl)
           $.ajax({
             url: verifyGmailUrl,
             method: "POST",
@@ -211,6 +263,7 @@
             data: JSON.stringify({ otp: otpVal }),
             dataType: "json",
             success: (res) => {
+              console.log("[v0] Gmail verify response:", res)
               if (res.status) {
                 Swal.fire({
                   icon: "success",
@@ -226,6 +279,7 @@
               }
             },
             error: () => {
+              console.error("[v0] Gmail verify error")
               Swal.fire({ icon: "error", title: "Error", text: "Verification failed. Try again." })
               $btn.prop("disabled", false).text("Verify OTP")
             },

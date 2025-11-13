@@ -4,6 +4,8 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../../db.php';
 require_once __DIR__ . '/gmail_config.php';
+require_once __DIR__ . '/../../../admin/classes/SuperAdminAccount.php';
+require_once __DIR__ . '/../../classes/AdminAuthService.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -31,11 +33,65 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
+$is_admin = $_SESSION['is_admin'] ?? false;
+$auth_user = $_SESSION['authUser'];
+
+if ($is_admin) {
+    // Admin validation
+    $adminAuth = new AdminAuthService();
+    $contact = $adminAuth->getAdminContactInfo($auth_user);
+    
+    if (!$contact) {
+        echo json_encode(['status' => false, 'message' => 'Admin not found']);
+        exit;
+    }
+    
+    // Check if email matches registered admin email
+    if (strtolower($email) !== strtolower($contact['email'])) {
+        echo json_encode(['status' => false, 'message' => 'Please use your registered email: ' . $contact['email']]);
+        exit;
+    }
+} else {
+    $stmt = $conn->prepare("SELECT email FROM student WHERE student_id = ? LIMIT 1");
+    $stmt->bind_param("s", $auth_user);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => false, 'message' => 'Student not found']);
+        $stmt->close();
+        exit;
+    }
+    
+    $student = $result->fetch_assoc();
+    $stmt->close();
+    
+    $registered_email = $student['email'];
+    
+    // Check if email matches registered G-Suite email
+    if (strtolower($email) !== strtolower($registered_email)) {
+        echo json_encode(['status' => false, 'message' => 'Please use your registered G-Suite email: ' . $registered_email]);
+        exit;
+    }
+    
+    // Verify it's a G-Suite email
+    if (strpos($email, '@g.batstate-u.edu.ph') === false) {
+        echo json_encode(['status' => false, 'message' => 'Please use your G-Suite account (ending with @g.batstate-u.edu.ph)']);
+        exit;
+    }
+}
+
 $otp_code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 $expires_at = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
-$stmt = $conn->prepare("INSERT INTO otp_verifications (student_id, email, otp_code, expires_at) VALUES (?, ?, ?, ?)");
-$stmt->bind_param("ssss", $_SESSION['authUser'], $email, $otp_code, $expires_at);
+if ($is_admin) {
+    $stmt = $conn->prepare("INSERT INTO otp_verifications (email, otp_code, expires_at) VALUES (?, ?, ?)");
+    $stmt->bind_param("sss", $email, $otp_code, $expires_at);
+} else {
+    $stmt = $conn->prepare("INSERT INTO otp_verifications (student_id, email, otp_code, expires_at) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $auth_user, $email, $otp_code, $expires_at);
+}
+
 $stmt->execute();
 $stmt->close();
 

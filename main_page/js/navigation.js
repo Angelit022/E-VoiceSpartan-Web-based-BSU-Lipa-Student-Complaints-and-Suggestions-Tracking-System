@@ -1,7 +1,3 @@
-/**
- * Navigation and UI Interactions
- */
-
 document.addEventListener("DOMContentLoaded", () => {
   // Mobile menu toggle (if needed)
   const navLinks = document.querySelectorAll(".nav-link")

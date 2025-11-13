@@ -15,7 +15,7 @@ function sendMailOTP($toEmail, $otp_code) {
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;     
         $mail->Port       = 465;                          
         $mail->CharSet    = 'UTF-8';
-
+        
         $mail->setFrom('23-36439@g.batstate-u.edu.ph', 'EVoiceSpartan');
         $mail->addAddress($toEmail);
 
@@ -29,10 +29,15 @@ function sendMailOTP($toEmail, $otp_code) {
             <p>– EVoiceSpartan System</p>
         ";
 
-        $mail->send();
-        return true;
+        if ($mail->send()) {
+            error_log('[Gmail OTP] Email sent successfully to: ' . $toEmail);
+            return true;
+        } else {
+            error_log('[Gmail OTP] Send failed: ' . $mail->ErrorInfo);
+            return false;
+        }
     } catch (Exception $e) {
-        error_log('Gmail OTP Error: ' . $mail->ErrorInfo);
+        error_log('[Gmail OTP] Error: ' . $e->getMessage() . ' | ' . $mail->ErrorInfo);
         return false;
     }
 }

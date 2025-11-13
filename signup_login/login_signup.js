@@ -4,6 +4,7 @@ const Swal = window.Swal
 let isSubmitting = false
 
 $(document).ready(() => {
+  // ===== SIGNUP VALIDATION =====
   if ($("#signupForm").length) {
     $("#signupForm").validate({
       rules: {

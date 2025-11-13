@@ -31,13 +31,12 @@ if (empty($student_id)) {
     exit();
 }
 
-
 $category = isset($_POST['area']) ? trim($_POST['area']) : '';
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
 $description = isset($_POST['description']) ? trim($_POST['description']) : '';
 $is_anonymous = (isset($_POST['anonymous']) && $_POST['anonymous'] === '1') ? 1 : 0;
 
-
+// Prepare data array
 $data = [
     'category' => $category,
     'title' => $title,
@@ -47,7 +46,7 @@ $data = [
 
 $suggestion = new Suggestion($mysqli);
 
-
+// Server-side validation
 $valid = $suggestion->validate($data, $student_id);
 if (!$valid['success']) {
     header('Content-Type: application/json');
@@ -55,6 +54,7 @@ if (!$valid['success']) {
     exit();
 }
 
+// Create suggestion
 $result = $suggestion->create($data, $student_id);
 if ($result['success']) {
     $suggestion_id = $result['suggestion_id'];

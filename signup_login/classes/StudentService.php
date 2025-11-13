@@ -15,7 +15,7 @@ class StudentService extends Database {
                 return $validation;
             }
 
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            $hashedPassword = hash('sha256', $password);
             $stmt = $connection->prepare("INSERT INTO student (first_name, middle_initial, last_name, email, student_id, phone_number, password) VALUES (?, ?, ?, ?, ?, ?, ?)");
             
             if (!$stmt) {
@@ -77,7 +77,8 @@ class StudentService extends Database {
                 $student = $result->fetch_assoc();
                 $stmt->close();
 
-                if (password_verify($password, $student['password'])) {
+                // Verify using SHA-256 hash comparison
+                if (hash('sha256', $password) === $student['password']) {
                     return [
                         'status' => true,
                         'message' => 'Login successful!',
@@ -113,22 +114,18 @@ class StudentService extends Database {
         $student_id = trim($student_id); 
         $phone_number = trim(preg_replace('/\s+/', '', $phone_number));
         
-        // Validate first name
         if (empty($first_name) || strlen($first_name) < 2) {
             return ['status' => false, 'message' => 'First name must be at least 2 characters'];
         }
         
-        // Validate last name
         if (empty($last_name) || strlen($last_name) < 2) {
             return ['status' => false, 'message' => 'Last name must be at least 2 characters'];
         }
         
-        // Validate email
         if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['status' => false, 'message' => 'Please enter a valid email address'];
         }
 
-        // Ensure only GSuite email is used (e.g., @g.batstate-u.edu.ph)
         $allowedDomain = '@g.batstate-u.edu.ph';
         if (!str_ends_with(strtolower($email), $allowedDomain)) {
             return [
@@ -137,17 +134,14 @@ class StudentService extends Database {
             ];
         }
 
-        // Validate student ID
         if (empty($student_id) || strlen($student_id) < 3) {
             return ['status' => false, 'message' => 'Student ID must be at least 3 characters'];
         }
         
-        // Validate phone number
         if (empty($phone_number) || strlen($phone_number) < 10) {
             return ['status' => false, 'message' => 'Phone number must be at least 10 characters'];
         }
         
-        // Validate password
         if (empty($password) || strlen($password) < 5) {
             return ['status' => false, 'message' => 'Password must be at least 5 characters'];
         }
@@ -168,7 +162,6 @@ class StudentService extends Database {
             return ['status' => false, 'message' => 'Student ID already exists'];
         }
         
-        // Check if email already exists
         $stmt = $connection->prepare("SELECT email FROM student WHERE LOWER(email) = LOWER(?) LIMIT 1");
         if (!$stmt) {
             return ['status' => false, 'message' => 'Database error during validation'];

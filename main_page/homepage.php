@@ -11,24 +11,21 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-VoiceSpartan - Your Voice, Our Priority</title>
-  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-  
-  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/global-theme.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/homepage.css">
+  <link rel="stylesheet" href="css/navbar.css">
 </head>
 <body>
   <?php include 'components/navbar.php'; ?>
-
   <main>
-    <!-- Hero Section -->
     <section class="hero-section">
       <div class="hero-background"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <h1 class="hero-title">Your Voice, Our Priority</h1>
+        <h1 class="hero-title" style="color: red;">Your Voice, Our Priority</h1>
         <p class="hero-description">
           E-VoiceSpartan is your platform to file complaints, share suggestions, and drive meaningful change in our campus.
         </p>
@@ -39,36 +36,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
       </div>
     </section>
 
-    <!-- Stats Section -->
-    <section class="stats-section">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-md-3 col-sm-6 text-center stat-card-wrapper">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div>
-              <div class="stat-value">2,547</div>
-              <div class="stat-label">Complaints Filed</div>
-            </div>
-          </div>
-          <div class="col-md-3 col-sm-6 text-center stat-card-wrapper">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-lightbulb"></i></div>
-              <div class="stat-value">1,823</div>
-              <div class="stat-label">Suggestions Received</div>
-            </div>
-          </div>
-          <div class="col-md-3 col-sm-6 text-center stat-card-wrapper">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="bi bi-people"></i></div>
-              <div class="stat-value">8,392</div>
-              <div class="stat-label">Active Members</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- How It Works -->
     <section class="how-it-works-section">
       <div class="container">
         <h2 class="section-title">How It Works</h2>
@@ -105,7 +72,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
       </div>
     </section>
 
-    <!-- Why Choose -->
     <section class="why-choose-section">
       <div class="container">
         <div class="row align-items-center">
@@ -153,11 +119,10 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
 
 <section id="mission-vision" class="mission-vision">
   <div class="container text-center">
-    <h2 class="section-title">Our Mission & Vision</h2>
+    <h2 class="section-title" style="color: #d51c1c;">Our Mission & Vision</h2>
     <p class="section-subtitle">Guiding the purpose and direction of E-VoiceSpartan</p>
 
     <div class="row justify-content-center align-items-stretch g-4">
-      <!-- Mission Box -->
       <div class="col-md-6">
         <div class="mv-box mission-box">
           <div class="mv-icon">
@@ -169,7 +134,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
         </div>
       </div>
 
-      <!-- Vision Box -->
       <div class="col-md-6">
         <div class="mv-box vision-box">
           <div class="mv-icon">
@@ -183,8 +147,6 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
   </div>
 </section>
 
-
-    <!-- CTA -->
     <section class="cta-section">
       <div class="container">
         <h2>Ready to Make a Difference?</h2>
@@ -201,5 +163,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/navigation.js"></script>
+  <script src="js/global-theme.js"></script>
+  <script src="js/navbar.js"></script>
 </body>
 </html>

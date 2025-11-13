@@ -11,71 +11,85 @@ class Complaint {
     }
 
     public function validate(array $data, $student_id) {
-        $required = ['category','title','description','priority'];
+        $required = ['category', 'title', 'description', 'priority'];
         foreach ($required as $field) {
             if (!isset($data[$field]) || trim($data[$field]) === '') {
                 return ['success' => false, 'message' => ucfirst($field) . " is required."];
             }
         }
 
-
         if (mb_strlen($data['title']) > 255) {
             return ['success' => false, 'message' => "Title must be 255 characters or less."];
         }
 
-
-        $allowedPriorities = ['Low','Medium','High'];
-        if (!in_array($data['priority'], $allowedPriorities, true)) {
-            return ['success' => false, 'message' => "Invalid priority value."];
+        if (mb_strlen($data['description']) < 10) {
+            return ['success' => false, 'message' => "Description must be at least 10 characters."];
         }
 
-        // Optional: verify student exists (if not anonymous)
-        if (!$data['is_anonymous']) {
-            if (empty($student_id)) {
-                return ['success' => false, 'message' => "Student session not found."];
-            }
+        if (empty($student_id)) {
+            return ['success' => false, 'message' => "Student session not found."];
         }
 
         return ['success' => true, 'message' => 'OK'];
     }
 
-   public function create(array $data, string $student_id = null) {
+    public function create(array $data, string $student_id = null) {
+        // Validate student_id first
+        if ($student_id === null || trim($student_id) === '') {
+            return ['success' => false, 'message' => 'Student ID is required.'];
+        }
 
+        // Check if student exists
+        $checkSql = "SELECT student_id FROM student WHERE student_id = ?";
+        $checkStmt = $this->conn->prepare($checkSql);
+        
+        if (!$checkStmt) {
+            return ['success' => false, 'message' => 'Database prepare error: ' . $this->conn->error];
+        }
+        
+        $checkStmt->bind_param("s", $student_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows === 0) {
+            $checkStmt->close();
+            return ['success' => false, 'message' => 'Student ID not found in database.'];
+        }
+        $checkStmt->close();
+
+        // Filter content
         $category = trim($data['category']);
         $title = $this->filterBannedWords(trim($data['title']));
         $description = $this->filterBannedWords(trim($data['description']));
-        $location = 'N/A';
-        $priority = $data['priority'];
+        $priority = trim($data['priority']);
         $is_anonymous = !empty($data['is_anonymous']) ? 1 : 0;
         
-        if ($is_anonymous) {
-            $studentVal = null;
-        } else {
-            $studentVal = $student_id !== null ? $student_id : '';
-        }
-
+        // Get Pending status
         $statusSql = "SELECT status_id FROM status WHERE status_name = 'Pending' LIMIT 1";
         $statusResult = $this->conn->query($statusSql);
+        
         if (!$statusResult || $statusResult->num_rows === 0) {
-            return ['success' => false, 'message' => 'Default status "Pending" not found in database. Please contact administrator.'];
+            return ['success' => false, 'message' => 'Default status "Pending" not found in database.'];
         }
+        
         $statusRow = $statusResult->fetch_assoc();
         $status_id = $statusRow['status_id'];
 
-        $sql = "INSERT INTO complaint (student_id, category, title, description, location, priority, status_id, is_anonymous)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO complaint (student_id, category, title, description, priority, status_id, is_anonymous, date_submitted)
+                VALUES (?, ?, ?, ?, ?, ?, ?, NOW())";
+        
         $stmt = $this->conn->prepare($sql);
+        
         if (!$stmt) {
             return ['success' => false, 'message' => "Prepare failed: " . $this->conn->error];
         }
 
         $stmt->bind_param(
-            "ssssssii",
-            $studentVal,
+            "sssssii",
+            $student_id,
             $category,
             $title,
             $description,
-            $location,
             $priority,
             $status_id,
             $is_anonymous
@@ -91,7 +105,6 @@ class Complaint {
             return ['success' => false, 'message' => 'Insert failed: ' . $err];
         }
     }
-
 
     public function containsBannedWords(string $text): bool {
         $lowerText = strtolower($text);

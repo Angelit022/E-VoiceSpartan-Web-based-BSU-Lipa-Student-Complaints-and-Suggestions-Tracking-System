@@ -1,14 +1,10 @@
-/**
- * Form Wizard Styles for Complaint and Suggestion Forms
- */
-
 .form-container {
   max-width: 720px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
-/* Simplified header with full-width background image, no ::before/::after */
+
 .form-header {
   position: relative;
   margin: -2rem -1rem 3rem -1rem;

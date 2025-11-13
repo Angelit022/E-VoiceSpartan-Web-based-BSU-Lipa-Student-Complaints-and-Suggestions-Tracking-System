@@ -1,8 +1,4 @@
-/**
- * Homepage Specific Styles - Enhanced with Bootstrap Integration
- */
 
-/* ===== HERO SECTION ===== */
 .hero-section {
   position: relative;
   min-height: 600px;
@@ -43,7 +39,7 @@
 .hero-title {
   font-size: 3.5rem;
   font-weight: 800;
-  color: var(--color-black);
+  color: var(--color-red);
   margin-bottom: 1.5rem;
   letter-spacing: -1px;
   line-height: 1.2;
@@ -78,42 +74,6 @@
   font-size: 1.8rem;
 }
 
-/* ===== STATS SECTION ===== */
-.stats-section {
-  background-color: var(--color-gray-light);
-  padding: 5rem;
-  margin-bottom: 4rem;
-}
-
-.stat-card-wrapper {
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  text-align: center;
-  padding: 2rem 1.5rem;
-}
-
-.stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 1.5rem;
-  display: block;
-}
-
-.stat-value {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: var(--color-red);
-  margin-bottom: 0.75rem;
-  display: block;
-}
-
-.stat-label {
-  color: var(--color-gray-dark);
-  font-weight: 600;
-  font-size: 1rem;
-}
-
 /* ===== HOW IT WORKS SECTION ===== */
 .how-it-works-section {
   padding: 4rem 0;
@@ -124,11 +84,10 @@
   text-align: center;
   font-size: 2.5rem;
   font-weight: 800;
-  color: var(--color-black);
+  color: var(--color-red);
   margin-bottom: 3.5rem;
 }
 
-/* Bootstrap grid responsive layout for 4 feature boxes */
 .feature-card {
   padding: 2.5rem 2rem;
   background-color: var(--color-white);
@@ -178,7 +137,7 @@
 .why-choose-section h2 {
   font-size: 2.2rem;
   font-weight: 800;
-  color: var(--color-black);
+  color: var(--color-red);
   margin-bottom: 2.5rem;
 }
 
@@ -232,7 +191,6 @@
   object-fit: cover;
 }
 
-/* ===== Mission & Vision Section ===== */
 .mission-vision {
   padding: 5rem 0;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -241,7 +199,7 @@
 .mission-vision .section-title {
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--color-dark);
+  color: var(--color-red);
   margin-bottom: 0.5rem;
 }
 
@@ -292,7 +250,6 @@
 .vision-box {
   border-top: 5px solid #ff9800;
 }
-
 
 /* ===== CTA SECTION ===== */
 .cta-section {
@@ -352,6 +309,36 @@
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
+
+/* Small devices (≥576px) */
+@media (max-width: 576px) {
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+  }
+
+  .feature-icon,
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .cta-section {
+    padding: 3rem 1rem;
+  }
+}
+
+/* Medium devices (≥768px) */
 @media (max-width: 768px) {
   .hero-title {
     font-size: 2.2rem;
@@ -374,33 +361,13 @@
     margin-bottom: 2.5rem;
   }
 
-  .feature-card {
-    padding: 2rem 1.5rem;
-  }
-
   .why-choose-section {
     padding: 3rem 0;
-  }
-
-  .why-choose-section .row {
-    gap: 2rem;
   }
 
   .placeholder-image {
     min-height: 300px;
     margin-top: 2rem;
-  }
-
-  .testimonial-card {
-    padding: 1.5rem;
-  }
-
-  .cta-section {
-    padding: 3rem 1rem;
-  }
-
-  .cta-section h2 {
-    font-size: 1.75rem;
   }
 
   .cta-buttons {
@@ -410,23 +377,77 @@
   .cta-buttons .btn {
     width: 100%;
   }
+}
 
-  .stats-card-wrapper {
-    margin-bottom: 1rem;
+/* Large devices (≥992px) */
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+
+  .hero-description {
+    font-size: 1.15rem;
+  }
+
+  .how-it-works-section {
+    padding: 3rem 0;
+  }
+
+  .feature-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .cta-section h2 {
+    font-size: 2.2rem;
   }
 }
 
-@media (max-width: 576px) {
+/* Extra Large devices (≥1200px) */
+@media (max-width: 1200px) {
+  .hero-section {
+    min-height: 550px;
+  }
+
   .hero-title {
-    font-size: 1.75rem;
+    font-size: 3.2rem;
   }
 
-  .stat-value {
+  .why-choose-section h2 {
     font-size: 2rem;
   }
 
-  .feature-icon,
-  .stat-icon {
-    font-size: 2rem;
+  .mv-box {
+    padding: 2rem;
+  }
+
+  .cta-section {
+    padding: 4rem 2rem;
+  }
+}
+
+/* Extra Extra Large devices (≥1400px) */
+@media (min-width: 1400px) {
+  .hero-section {
+    min-height: 700px;
+  }
+
+  .hero-title {
+    font-size: 4rem;
+  }
+
+  .hero-description {
+    font-size: 1.4rem;
+  }
+
+  .how-it-works-section {
+    padding: 6rem 0;
+  }
+
+  .mission-vision {
+    padding: 6rem 0;
+  }
+
+  .cta-section {
+    padding: 6rem 2rem;
   }
 }

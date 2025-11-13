@@ -1,7 +1,3 @@
-/**
- * Suggestion Form Wizard Class
- * Handles 4-step suggestion submission form
- */
 class SuggestionForm {
   constructor() {
     this.currentStep = 1
@@ -14,7 +10,8 @@ class SuggestionForm {
     this.anonymousCheckbox = document.getElementById("anonymous")
     this.anonymousInfo = document.getElementById("anonymousInfo")
     this.agreeCheckbox = document.getElementById("agree")
-    this.Swal = window.Swal // Declare Swal variable
+    this.Swal = window.Swal
+    this.hasUnsavedChanges = false
 
     this.init()
   }
@@ -49,6 +46,36 @@ class SuggestionForm {
     if (this.form) {
       this.form.addEventListener("submit", (e) => this.handleSubmit(e))
     }
+
+    this.setupNavigationValidation()
+  }
+
+  setupNavigationValidation() {
+    const navLinks = document.querySelectorAll("a.nav-link, .navbar-brand")
+    navLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        if (this.currentStep >= 2) {
+          e.preventDefault()
+          this.Swal.fire({
+            title: "Leave Form?",
+            text:
+              "You are currently on Step " +
+              this.currentStep +
+              ". Are you sure you want to exit without completing your suggestion?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#837779ff",
+            cancelButtonColor: "#3269d5ff",
+            confirmButtonText: "Yes, Exit",
+            cancelButtonText: "Continue",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              window.location.href = link.href
+            }
+          })
+        }
+      })
+    })
   }
 
   toggleAnonymousInfo() {
@@ -258,7 +285,7 @@ class SuggestionForm {
 
   showSuccessStep(suggestionId, isAnonymous) {
     this.currentStep = 4
-    const referenceId = "SGT-" + String(suggestionId).padStart(6, "0")
+    const referenceId = "SEVS-" + String(suggestionId).padStart(5, "0")
     const referenceIdEl = document.getElementById("referenceId")
 
     if (referenceIdEl) {
@@ -289,7 +316,6 @@ class SuggestionForm {
     this.updateStepIndicators()
     this.updateButtonsVisibility()
 
-    // Add done button listener
     if (this.doneBtn) {
       this.doneBtn.onclick = () => {
         window.location.href = "../homepage.php"

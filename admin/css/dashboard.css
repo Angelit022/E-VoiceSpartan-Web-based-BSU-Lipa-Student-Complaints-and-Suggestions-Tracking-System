@@ -1,0 +1,52 @@
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  transform: translate(30%, -30%);
+}
+
+.stat-card h3 {
+  font-weight: 800;
+  font-size: 2.5rem;
+}
+
+.stat-card .text-danger {
+  color: #dc3545;
+}
+.stat-card .text-primary {
+  color: #0d6efd;
+}
+.stat-card .text-warning {
+  color: #ffc107;
+}
+.stat-card .text-success {
+  color: #198754;
+}
+
+/* Mobile responsive styles for dashboard stats */
+@media (max-width: 767.98px) {
+  .stat-card h3 {
+    font-size: 1.75rem;
+  }
+
+  .stat-card i {
+    font-size: 2rem !important;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .stat-card h3 {
+    font-size: 2rem;
+  }
+}

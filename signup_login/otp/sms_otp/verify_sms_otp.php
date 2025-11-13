@@ -25,17 +25,29 @@ if (!preg_match('/^\d{6}$/', $otp_input)) {
     exit;
 }
 
-$student_id = $_SESSION['authUser'];
+$auth_user = $_SESSION['authUser'];
+$is_admin = $_SESSION['is_admin'] ?? false;
 
-$stmt = $conn->prepare("
-    SELECT id, otp_code, expires_at
-    FROM otp_verifications
-    WHERE student_id = ?
-    ORDER BY created_at DESC
-    LIMIT 1
-");
+if ($is_admin) {
+    $stmt = $conn->prepare("
+        SELECT id, otp_code, expires_at
+        FROM otp_verifications
+        WHERE email = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $stmt->bind_param("s", $auth_user);
+} else {
+    $stmt = $conn->prepare("
+        SELECT id, otp_code, expires_at
+        FROM otp_verifications
+        WHERE student_id = ?
+        ORDER BY created_at DESC
+        LIMIT 1
+    ");
+    $stmt->bind_param("s", $auth_user);
+}
 
-$stmt->bind_param("s", $student_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -52,29 +64,40 @@ if (strtotime($otp_record['expires_at']) < time()) {
     exit;
 }
 
-if ($otp_record['otp_code'] !== $otp_input) {
+if (trim($otp_record['otp_code']) !== trim($otp_input)) {
+    error_log("[verify_sms_otp] OTP mismatch - DB: '" . $otp_record['otp_code'] . "' vs Input: '" . $otp_input . "'");
     echo json_encode(['status' => false, 'message' => 'Incorrect OTP. Please try again.']);
     exit;
 }
 
-$_SESSION['user_id'] = $student_id;
-$_SESSION['logged_in'] = true;
+if ($is_admin) {
+    $_SESSION['admin_id'] = $auth_user;
+    $_SESSION['admin_logged_in'] = true;
+    $_SESSION['user_id'] = $auth_user;
+    $_SESSION['logged_in'] = true;
+} else {
+    $_SESSION['user_id'] = $auth_user;
+    $_SESSION['logged_in'] = true;
+}
 
 $delete_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE id = ?");
 $delete_stmt->bind_param("i", $otp_record['id']);
 $delete_stmt->execute();
 $delete_stmt->close();
 
-$base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http")
-          . "://" . $_SERVER['HTTP_HOST']
-          . str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'], 3)); 
+$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'];
+$basePath = dirname($_SERVER['SCRIPT_NAME'], 4);
 
-$redirect_url = $base_url . "/../main_page/homepage.php";
+if ($is_admin) {
+    $redirect_url = $protocol . "://" . $host . $basePath . "/admin/index.php";
+} else {
+    $redirect_url = $protocol . "://" . $host . $basePath . "/main_page/homepage.php";
+}
 
 echo json_encode([
     'status' => true,
     'message' => 'Verification successful!',
     'redirect' => $redirect_url
 ]);
-
 ?>

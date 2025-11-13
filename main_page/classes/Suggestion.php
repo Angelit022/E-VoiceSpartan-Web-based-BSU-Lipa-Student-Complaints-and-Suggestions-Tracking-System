@@ -26,10 +26,8 @@ class Suggestion {
             return ['success' => false, 'message' => "Description must be at least 10 characters."];
         }
 
-        if (!$data['is_anonymous']) {
-            if (empty($student_id)) {
-                return ['success' => false, 'message' => "Student session not found."];
-            }
+        if (empty($student_id)) {
+            return ['success' => false, 'message' => "Student session not found."];
         }
 
         return ['success' => true, 'message' => 'OK'];
@@ -41,6 +39,12 @@ class Suggestion {
         $description = $this->filterBannedWords(trim($data['description']));
         $is_anonymous = !empty($data['is_anonymous']) ? 1 : 0;
         
+        // Use the plain student ID; anonymity is indicated by is_anonymous only
+        $studentVal = $student_id !== null ? $student_id : '';
+        if (empty($studentVal)) {
+            return ['success' => false, 'message' => 'Student ID is required.'];
+        }
+        
         // Get the default "Pending" status_id from the status table
         $statusSql = "SELECT status_id FROM status WHERE status_name = 'Pending' LIMIT 1";
         $statusResult = $this->conn->query($statusSql);
@@ -50,7 +54,6 @@ class Suggestion {
         $statusRow = $statusResult->fetch_assoc();
         $status_id = $statusRow['status_id'];
 
-        // student_id should be "s" (string), not "i" (integer) since student_id is VARCHAR in database
         $sql = "INSERT INTO suggestion (student_id, category, title, description, status_id, is_anonymous)
                 VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
@@ -58,9 +61,6 @@ class Suggestion {
             return ['success' => false, 'message' => "Prepare failed: " . $this->conn->error];
         }
 
-        $studentVal = $student_id !== null ? $student_id : '';
-
-        // 6 parameters: student_id(s), category(s), title(s), description(s), status_id(i), is_anonymous(i)
         $stmt->bind_param(
             "ssssii",
             $studentVal,
