@@ -30,22 +30,27 @@ class Suggestion {
             return ['success' => false, 'message' => "Student session not found."];
         }
 
+        // Validate priority if provided
+        if (isset($data['priority']) && !in_array($data['priority'], ['Low', 'Medium', 'High'])) {
+            return ['success' => false, 'message' => "Invalid priority level."];
+        }
+
         return ['success' => true, 'message' => 'OK'];
     }
 
     public function create(array $data, string $student_id = null) {
         $category = trim($data['category']);
         $title = $this->filterBannedWords(trim($data['title']));
+        $priority = isset($data['priority']) ? trim($data['priority']) : 'Medium';
         $description = $this->filterBannedWords(trim($data['description']));
         $is_anonymous = !empty($data['is_anonymous']) ? 1 : 0;
         
-        // Use the plain student ID; anonymity is indicated by is_anonymous only
         $studentVal = $student_id !== null ? $student_id : '';
         if (empty($studentVal)) {
             return ['success' => false, 'message' => 'Student ID is required.'];
         }
         
-        // Get the default "Pending" status_id from the status table
+        // Get the default "Pending" status_id
         $statusSql = "SELECT status_id FROM status WHERE status_name = 'Pending' LIMIT 1";
         $statusResult = $this->conn->query($statusSql);
         if (!$statusResult || $statusResult->num_rows === 0) {
@@ -54,18 +59,19 @@ class Suggestion {
         $statusRow = $statusResult->fetch_assoc();
         $status_id = $statusRow['status_id'];
 
-        $sql = "INSERT INTO suggestion (student_id, category, title, description, status_id, is_anonymous)
-                VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO suggestion (student_id, category, title, priority, description, status_id, is_anonymous)
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         if (!$stmt) {
             return ['success' => false, 'message' => "Prepare failed: " . $this->conn->error];
         }
 
         $stmt->bind_param(
-            "ssssii",
+            "sssssii",
             $studentVal,
             $category,
             $title,
+            $priority,
             $description,
             $status_id,
             $is_anonymous

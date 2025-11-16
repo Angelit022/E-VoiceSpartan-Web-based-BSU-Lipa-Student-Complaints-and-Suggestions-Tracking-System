@@ -1,8 +1,4 @@
 <?php
-/**
- * SuperAdminAccount - Hardcoded Super Admin Credentials (OOP with Private Properties)
- * Security: Plain text password verification for hardcoded Super Admin
- */
 class SuperAdminAccount {
     private $admin_id = 1;
     private $name = 'Super Administrator';

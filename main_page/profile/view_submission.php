@@ -7,6 +7,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
 }
 
 require_once '../../db.php';
+require_once '../classes/UserProfile.php';
 
 if (!isset($_GET['id']) || !isset($_GET['type'])) {
     http_response_code(400);
@@ -16,31 +17,13 @@ if (!isset($_GET['id']) || !isset($_GET['type'])) {
 
 $database = new Database();
 $db = $database->getConnection();
+$userProfile = new UserProfile($db, $_SESSION['user_id']);
 
 $id = intval($_GET['id']);
 $type = $_GET['type'];
 
-// Fetch submission details
-if ($type === 'Complaint') {
-    $query = "SELECT c.complaint_id as id, 'Complaint' as type, c.category, c.title, 
-                     c.description, c.priority, s.status_name as status, c.date_submitted, c.is_anonymous
-              FROM complaint c
-              LEFT JOIN status s ON c.status_id = s.status_id
-              WHERE c.complaint_id = ?";
-} else {
-    $query = "SELECT s.suggestion_id as id, 'Suggestion' as type, s.category, s.title, 
-                     s.description, NULL as priority, st.status_name as status, s.date_submitted, s.is_anonymous
-              FROM suggestion s
-              LEFT JOIN status st ON s.status_id = st.status_id
-              WHERE s.suggestion_id = ?";
-}
-
-$stmt = $db->prepare($query);
-$stmt->bind_param("i", $id);
-$stmt->execute();
-$result = $stmt->get_result();
-$submission = $result->fetch_assoc();
-$stmt->close();
+// Fetch submission details using class method
+$submission = $userProfile->getSubmissionDetails($type, $id);
 
 if (!$submission) {
     http_response_code(404);
@@ -48,17 +31,10 @@ if (!$submission) {
     exit();
 }
 
+// Get attachments if complaint
 $attachments = [];
 if ($type === 'Complaint') {
-    $attach_query = "SELECT attachment_id, file_path, file_type FROM attachment WHERE complaint_id = ? ORDER BY uploaded_at DESC";
-    $attach_stmt = $db->prepare($attach_query);
-    $attach_stmt->bind_param("i", $id);
-    $attach_stmt->execute();
-    $attach_result = $attach_stmt->get_result();
-    while ($row = $attach_result->fetch_assoc()) {
-        $attachments[] = $row;
-    }
-    $attach_stmt->close();
+    $attachments = $userProfile->getAttachments($id);
 }
 ?>
 
@@ -91,27 +67,22 @@ if ($type === 'Complaint') {
         <p class="mb-0"><?php echo htmlspecialchars($submission['category'] ?? 'N/A'); ?></p>
     </div>
 
-    <?php if ($type === 'Complaint' && $submission['priority']): ?>
+    <?php if (!empty($submission['priority'])): ?>
     <div class="mb-3">
         <h6 class="text-muted mb-2"><i class="bi bi-exclamation-triangle"></i> Priority</h6>
         <p class="mb-0">
-            <span class="badge <?php 
-                echo $submission['priority'] === 'High' ? 'bg-danger' : 
-                     ($submission['priority'] === 'Medium' ? 'bg-warning text-dark' : 'bg-info'); 
-            ?>">
+            <span class="badge <?php echo UserProfile::getPriorityBadgeClass($submission['priority']); ?>">
                 <?php echo htmlspecialchars($submission['priority']); ?>
             </span>
         </p>
     </div>
     <?php endif; ?>
 
-
     <div class="mb-3">
         <h6 class="text-muted mb-2"><i class="bi bi-file-earmark-text"></i> Description</h6>
         <p class="mb-0" style="white-space: pre-wrap; word-wrap: break-word;"><?php echo htmlspecialchars($submission['description']); ?></p>
     </div>
 
-    <!-- Display attachments section -->
     <?php if (!empty($attachments)): ?>
     <div class="mb-3">
         <h6 class="text-muted mb-2"><i class="bi bi-paperclip"></i> Attachments</h6>
@@ -141,15 +112,7 @@ if ($type === 'Complaint') {
     <div class="mb-3">
         <h6 class="text-muted mb-2"><i class="bi bi-badge"></i> Status</h6>
         <p class="mb-0">
-            <span class="badge <?php 
-                echo match(strtolower(str_replace(' ', '-', $submission['status']))) {
-                    'pending' => 'bg-warning text-dark',
-                    'in-progress' => 'bg-info',
-                    'resolved' => 'bg-success',
-                    'rejected' => 'bg-danger',
-                    default => 'bg-secondary'
-                };
-            ?>">
+            <span class="badge <?php echo UserProfile::getStatusBadgeClass($submission['status']); ?>">
                 <i class="bi <?php 
                     echo match(strtolower(str_replace(' ', '-', $submission['status']))) {
                         'pending' => 'bi-hourglass-split',

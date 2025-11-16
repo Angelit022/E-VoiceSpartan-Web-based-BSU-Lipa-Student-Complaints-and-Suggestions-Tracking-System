@@ -21,7 +21,7 @@ $totalNotifications = $notificationManager->getTotalCount();
 $totalPages = ceil($totalNotifications / $notificationsPerPage);
 $unreadCount = $notificationManager->getUnreadCount();
 
- // Helper function to determine notification data attributes
+// Helper function to determine notification data attributes
 function getNotificationAttributes($notif) {
     $type = $notif['type'];
     
@@ -88,6 +88,14 @@ function getNotificationAttributes($notif) {
         <?php else: ?>
             <?php foreach ($notifications as $notif): ?>
                 <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>" <?= getNotificationAttributes($notif) ?>>
+                    <?php if ($notif['type'] === 'response'): ?>
+                        <div class="view-response-icon" 
+                             onclick="viewResponse(<?= $notif['complaint_id'] ?? $notif['suggestion_id'] ?>, '<?= $notif['complaint_id'] ? 'complaint' : 'suggestion' ?>')" 
+                             title="View Response">
+                            <i class="bi bi-envelope-open"></i>
+                        </div>
+                    <?php endif; ?>
+                    
                     <div class="notification-header">
                         <div>
                             <span class="notification-type">
@@ -126,7 +134,6 @@ function getNotificationAttributes($notif) {
 
             <?php if ($totalPages > 1): ?>
                 <div class="pagination-container">
-
                     <button class="pagination-btn" 
                             onclick="window.location.href='?page=<?= max(1, $currentPage - 1) ?>'" 
                             <?= $currentPage <= 1 ? 'disabled' : '' ?>>

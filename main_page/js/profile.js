@@ -1,27 +1,30 @@
+/**
+ * Profile Page Main Script
+ * Handles table initialization, filtering, and modal operations
+ */
 
 const bootstrap = window.bootstrap;
 
-// Global reference to the table
 let $table;
+let currentTypeFilter = 'all';
+let currentStatusFilter = 'all';
+let tableInitialized = false;
 
 // Initialize submissions table, search and sorting
 (function() {
   function initTable() {
+    if (tableInitialized) return;
+
     $table = $('#submissionsTable');
-    if (!$table.length || typeof $table.bootstrapTable !== 'function') {
-      console.warn('Table or bootstrap-table not found');
-      return;
+    if (!$table.length || typeof $table.bootstrapTable !== 'function') return;
+
+    if ($table.data('bootstrap.table')) {
+      $table.bootstrapTable('destroy');
     }
 
-    // Initialize table with custom data extraction
-    $table.bootstrapTable({
-      // Tell bootstrap-table to get data from data-* attributes
-      onPostBody: function() {
-        // This ensures data attributes are read properly
-      }
-    });
+    $table.bootstrapTable();
+    tableInitialized = true;
 
-    // Hook up search box
     const $search = document.getElementById('tableSearch');
     if ($search) {
       $search.addEventListener('input', function (e) {
@@ -29,34 +32,6 @@ let $table;
       });
     }
 
-    // Sorting controls (if they exist)
-    const sortColumn = document.getElementById('sortColumn');
-    const sortOrder = document.getElementById('sortOrder');
-
-    function applySort() {
-      const sortName = sortColumn ? sortColumn.value : 'date';
-      const order = sortOrder ? sortOrder.value : 'desc';
-      const fieldMap = {
-        type: 'type',
-        title: 'title',
-        category: 'category',
-        date: 'date',
-        status: 'status'
-      };
-      const mapped = fieldMap[sortName] || 'date';
-      $table.bootstrapTable('refreshOptions', {
-        sortName: mapped,
-        sortOrder: order
-      });
-    }
-
-    if (sortColumn) sortColumn.addEventListener('change', applySort);
-    if (sortOrder) sortOrder.addEventListener('change', applySort);
-
-    // Initial sort
-    applySort();
-
-    // Setup filter buttons AFTER table is initialized
     setupFilterButtons();
   }
 
@@ -67,57 +42,71 @@ let $table;
   }
 })();
 
-// Setup filter buttons with simple display toggle (from old working version)
+// Setup filter buttons with proper multi-filter logic
 function setupFilterButtons() {
   document.querySelectorAll('.filter-btn').forEach((btn) => {
     btn.addEventListener('click', function() {
-      // Update active state
-      document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      
-      // Apply filter
       const filter = btn.dataset.filter;
-      console.log('Filter clicked:', filter);
+      const filterType = btn.dataset.filterType;
       
-      filterTable(filter);
+      if (filter === 'all') {
+        // Clear all filters
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTypeFilter = 'all';
+        currentStatusFilter = 'all';
+      } else if (filterType === 'type') {
+        // Toggle type filters
+        document.querySelectorAll('.filter-btn[data-filter-type="type"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTypeFilter = filter;
+        // Remove 'All' active state
+        document.querySelector('.filter-btn[data-filter="all"]')?.classList.remove('active');
+      } else if (filterType === 'status') {
+        // Toggle status filters
+        document.querySelectorAll('.filter-btn[data-filter-type="status"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatusFilter = filter;
+        // Remove 'All' active state
+        document.querySelector('.filter-btn[data-filter="all"]')?.classList.remove('active');
+      }
+      
+      applyFilters();
     });
   });
 }
 
-// Filter table based on type/status (simple display toggle)
-function filterTable(filter) {
+// Apply combined type and status filters
+function applyFilters() {
   const rows = document.querySelectorAll('.submission-row');
   let visibleCount = 0;
 
   rows.forEach((row) => {
-    let shouldShow = false;
+    const rowType = row.dataset.type;
+    const rowStatus = row.dataset.status;
+    let shouldShow = true;
 
-    if (filter === 'all') {
-      shouldShow = true;
-    } else if (["Pending", "In Progress", "Resolved", "Rejected"].includes(filter)) {
-      shouldShow = row.dataset.status === filter;
-    } else if (["Complaint", "Suggestion"].includes(filter)) {
-      shouldShow = row.dataset.type === filter;
+    // Apply type filter
+    if (currentTypeFilter !== 'all' && rowType !== currentTypeFilter) {
+      shouldShow = false;
+    }
+
+    // Apply status filter
+    if (currentStatusFilter !== 'all' && rowStatus !== currentStatusFilter) {
+      shouldShow = false;
     }
 
     row.style.display = shouldShow ? '' : 'none';
     if (shouldShow) visibleCount++;
   });
-
-  console.log(`Filter applied: ${filter}, Visible rows: ${visibleCount}`);
 }
 
-// View submission modal - MUST be global
+// View submission modal
 window.viewSubmission = function(id, type) {
-  console.log('viewSubmission called:', id, type);
   const modalBody = document.getElementById('viewModalBody');
   
-  if (!modalBody) {
-    console.error('Modal body not found');
-    return;
-  }
+  if (!modalBody) return;
   
-  // Show loading state
   modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
   const modal = new bootstrap.Modal(document.getElementById('viewModal'));
   modal.show();
@@ -131,7 +120,6 @@ window.viewSubmission = function(id, type) {
       modalBody.innerHTML = html;
     })
     .catch((err) => {
-      console.error('Error loading submission:', err);
       modalBody.innerHTML = `
         <div class="alert alert-danger" role="alert">
           <i class="bi bi-exclamation-triangle"></i>
@@ -140,31 +128,33 @@ window.viewSubmission = function(id, type) {
     });
 };
 
-// Edit submission modal - MUST be global
+// Edit submission modal
 window.editSubmission = function(id, type) {
-  console.log('editSubmission called:', id, type);
   const modalBody = document.getElementById('editModalBody');
   
-  if (!modalBody) {
-    console.error('Modal body not found');
-    return;
-  }
+  if (!modalBody) return;
   
-  // Show loading state
   modalBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-  const modal = new bootstrap.Modal(document.getElementById('editModal'));
+  
+  const editModalElement = document.getElementById('editModal');
+  if (!editModalElement) return;
+  
+  const modal = new bootstrap.Modal(editModalElement);
   modal.show();
   
   fetch(`edit_submission.php?id=${id}&type=${encodeURIComponent(type)}`)
-    .then((res) => { 
+    .then((res) => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`); 
       return res.text();
     })
     .then((html) => {
       modalBody.innerHTML = html;
+      // Call the initialization function from edit-submission.js
+      if (typeof initializeEditForm === 'function') {
+        initializeEditForm();
+      }
     })
     .catch((err) => {
-      console.error('Error loading edit form:', err);
       modalBody.innerHTML = `
         <div class="alert alert-danger" role="alert">
           <i class="bi bi-exclamation-triangle"></i>
@@ -173,10 +163,8 @@ window.editSubmission = function(id, type) {
     });
 };
 
-// Delete submission - MUST be global
+// Delete submission
 window.deleteSubmission = function(id, type) {
-  console.log('deleteSubmission called:', id, type);
-  
   Swal.fire({
     title: 'Delete ' + type + '?',
     text: "This action cannot be undone! All associated data will be permanently deleted.",
@@ -189,7 +177,6 @@ window.deleteSubmission = function(id, type) {
     reverseButtons: true
   }).then((result) => {
     if (result.isConfirmed) {
-      // Show loading
       Swal.fire({
         title: 'Deleting...',
         text: 'Please wait',
@@ -213,117 +200,29 @@ window.deleteSubmission = function(id, type) {
             title: 'Deleted!',
             text: data.message,
             icon: 'success',
-            confirmButtonColor: '#dc3545'
+            confirmButtonColor: '#28a745',
+            timer: 2000,
+            showConfirmButton: false
           }).then(() => {
             location.reload();
           });
         } else {
-          Swal.fire('Error!', data.message, 'error');
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.message,
+            confirmButtonColor: '#c41e3a'
+          });
         }
       })
       .catch(error => {
-        console.error('Error:', error);
-        Swal.fire('Error!', 'Failed to delete submission: ' + error.message, 'error');
-      });
-    }
-  });
-};
-
-// Submit edit form - MUST be global
-window.submitEditForm = function(id, type) {
-  console.log('submitEditForm called:', id, type);
-  
-  const title = document.getElementById('edit-title')?.value.trim();
-  const description = document.getElementById('edit-description')?.value.trim();
-  const category = document.getElementById('edit-category')?.value.trim();
-  const priorityEl = document.getElementById('edit-priority');
-  const priority = priorityEl ? priorityEl.value : null;
-
-  if (!title || !description) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: 'Please fill in all required fields'
-    });
-    return;
-  }
-
-  if (title.length > 255) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: 'Title must be 255 characters or less'
-    });
-    return;
-  }
-
-  if (description.length < 10) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Validation Error',
-      text: 'Description must be at least 10 characters'
-    });
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('id', id);
-  formData.append('type', type);
-  formData.append('title', title);
-  formData.append('description', description);
-  formData.append('category', category);
-  if (priority) formData.append('priority', priority);
-
-  // Handle file upload if present
-  const fileInput = document.getElementById('new-attachment');
-  if (fileInput && fileInput.files.length > 0) {
-    formData.append('new_attachment', fileInput.files[0]);
-  }
-
-  // Show loading
-  Swal.fire({
-    title: 'Saving Changes...',
-    text: 'Please wait',
-    allowOutsideClick: false,
-    didOpen: () => {
-      Swal.showLoading();
-    }
-  });
-
-  fetch(`edit_submission.php?id=${id}&type=${encodeURIComponent(type)}`, { 
-    method: 'POST', 
-    body: formData 
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.success) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success!',
-          text: data.message,
-          confirmButtonColor: '#dc3545'
-        }).then(() => {
-          const modalEl = document.getElementById('editModal');
-          const modalInstance = bootstrap.Modal.getInstance(modalEl);
-          if (modalInstance) {
-            modalInstance.hide();
-          }
-          location.reload();
-        });
-      } else {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: data.message
+          text: 'Failed to delete submission: ' + error.message,
+          confirmButtonColor: '#c41e3a'
         });
-      }
-    })
-    .catch((err) => {
-      console.error("Error submitting edit:", err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error updating submission: ' + err.message
       });
-    });
+    }
+  });
 };

@@ -17,6 +17,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/homepage.css">
   <link rel="stylesheet" href="css/navbar.css">
+  
 </head>
 <body>
   <?php include 'components/navbar.php'; ?>

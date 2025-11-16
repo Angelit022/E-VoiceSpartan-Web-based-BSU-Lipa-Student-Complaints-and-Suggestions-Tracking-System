@@ -65,7 +65,6 @@ if (strtotime($otp_record['expires_at']) < time()) {
 }
 
 if (trim($otp_record['otp_code']) !== trim($otp_input)) {
-    error_log("[verify_sms_otp] OTP mismatch - DB: '" . $otp_record['otp_code'] . "' vs Input: '" . $otp_input . "'");
     echo json_encode(['status' => false, 'message' => 'Incorrect OTP. Please try again.']);
     exit;
 }
@@ -80,20 +79,28 @@ if ($is_admin) {
     $_SESSION['logged_in'] = true;
 }
 
+// Delete used OTP
 $delete_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE id = ?");
-$delete_stmt->bind_param("i", $otp_record['id']);
-$delete_stmt->execute();
-$delete_stmt->close();
+if ($delete_stmt) {
+    $delete_stmt->bind_param("i", $otp_record['id']);
+    $delete_stmt->execute();
+    $delete_stmt->close();
+}
+
+// Cleanup expired OTPs
+$cleanup_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE expires_at < NOW()");
+if ($cleanup_stmt) {
+    $cleanup_stmt->execute();
+    $cleanup_stmt->close();
+}
 
 $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
 $basePath = dirname($_SERVER['SCRIPT_NAME'], 4);
 
-if ($is_admin) {
-    $redirect_url = $protocol . "://" . $host . $basePath . "/admin/index.php";
-} else {
-    $redirect_url = $protocol . "://" . $host . $basePath . "/main_page/homepage.php";
-}
+$redirect_url = $is_admin
+    ? "$protocol://$host$basePath/admin/index.php"
+    : "$protocol://$host$basePath/main_page/homepage.php";
 
 echo json_encode([
     'status' => true,

@@ -110,12 +110,19 @@ class SuggestionForm {
       }
     } else if (this.currentStep === 2) {
       const title = document.getElementById("title").value.trim()
+      const priority = document.getElementById("priority").value
       const description = document.getElementById("description").value.trim()
 
       if (!title) {
         this.Swal.fire("Missing Field", "Please enter a suggestion title.", "warning")
         return false
       }
+
+      if (!priority) {
+        this.Swal.fire("Missing Field", "Please select a priority level.", "warning")
+        return false
+      }
+
       if (!description) {
         this.Swal.fire("Missing Field", "Please enter a detailed description.", "warning")
         return false
@@ -147,10 +154,12 @@ class SuggestionForm {
     const selectedArea = document.querySelector('input[name="area"]:checked')
     const reviewArea = document.getElementById("reviewArea")
     const reviewTitle = document.getElementById("reviewTitle")
+    const reviewPriority = document.getElementById("reviewPriority")
     const reviewDescription = document.getElementById("reviewDescription")
 
     if (reviewArea) reviewArea.textContent = selectedArea ? selectedArea.value : "-"
     if (reviewTitle) reviewTitle.textContent = document.getElementById("title").value || "-"
+    if (reviewPriority) reviewPriority.textContent = document.getElementById("priority").value || "-"
     if (reviewDescription) reviewDescription.textContent = document.getElementById("description").value || "-"
   }
 
@@ -181,7 +190,6 @@ class SuggestionForm {
   }
 
   updateButtonsVisibility() {
-    // Reset all buttons
     if (this.submitBtn) this.submitBtn.style.display = "none"
     if (this.nextBtn) this.nextBtn.style.display = "none"
     if (this.doneBtn) this.doneBtn.style.display = "none"
@@ -237,6 +245,7 @@ class SuggestionForm {
       formData.append("area", selectedArea.value)
     }
     formData.append("title", document.getElementById("title").value)
+    formData.append("priority", document.getElementById("priority").value)
     formData.append("description", document.getElementById("description").value)
     formData.append("anonymous", this.anonymousCheckbox.checked ? "1" : "0")
 

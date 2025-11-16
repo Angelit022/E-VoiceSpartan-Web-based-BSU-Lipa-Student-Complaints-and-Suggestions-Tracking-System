@@ -30,7 +30,6 @@ if (!isset($_SESSION['user_id'])) {
       <p class="mb-0">Help us improve BSU Lipa campus with your valuable ideas and feedback</p>
     </div>
 
-    <!-- Progress Steps -->
     <div class="steps-bar mb-4">
       <div class="step active" id="step1-indicator">
         <div class="step-circle">1</div>
@@ -52,7 +51,6 @@ if (!isset($_SESSION['user_id'])) {
 
     <form id="suggestionForm" class="form-wizard" method="POST" action="process_suggestion.php" novalidate enctype="multipart/form-data">
       
-      <!-- Step 1: Area Selection -->
       <div class="step-panel active" id="step1">
         <h2>Step 1: Select Improvement Area</h2>
         <p>Choose the area you'd like to improve</p>
@@ -74,7 +72,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
 
-      <!-- Step 2: Details -->
       <div class="step-panel" id="step2">
         <h2>Step 2: Provide Details</h2>
         <p>Share the details of your suggestion</p>
@@ -85,12 +82,21 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
         <div class="form-group">
+          <label for="priority">Priority Level *</label>
+          <select id="priority" name="priority" class="form-select" required>
+            <option value=""selected>-- Select Priority Level --</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+        <div class="form-group">
           <label for="description">Detailed Description *</label>
           <textarea id="description" name="description" placeholder="Provide as much detail as possible to help us understand your vision" required></textarea>
         </div>
       </div>
 
-      <!-- Step 3: Review & Submit -->
       <div class="step-panel" id="step3">
         <h2>Step 3: Review & Submit</h2>
         <p>Please verify all details before submitting</p>
@@ -99,6 +105,7 @@ if (!isset($_SESSION['user_id'])) {
           <div style="margin-bottom: 1rem; font-weight: 600;">Your Suggestion Information:</div>
           <div class="review-item"><span class="review-label">Area:</span><span class="review-value" id="reviewArea">-</span></div>
           <div class="review-item"><span class="review-label">Title:</span><span class="review-value" id="reviewTitle">-</span></div>
+          <div class="review-item"><span class="review-label">Priority:</span><span class="review-value" id="reviewPriority">-</span></div>
           <div class="review-item"><span class="review-label">Description:</span><span class="review-value" id="reviewDescription">-</span></div>
         </div>
 
@@ -115,7 +122,6 @@ if (!isset($_SESSION['user_id'])) {
           </div>
         </div>
 
-        <!-- Terms & Conditions -->
         <div class="terms-section">
           <div class="terms-header">
             <i class="bi bi-file-earmark-text terms-icon"></i>
@@ -137,7 +143,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
 
-      <!-- Step 4: Success -->
       <div class="step-panel" id="step4" style="display: none;">
         <div class="success-message">
           <div class="success-icon"><i class="bi bi-check-circle" style="font-size: 3rem; color: var(--color-green);"></i></div>
@@ -160,7 +165,6 @@ if (!isset($_SESSION['user_id'])) {
         </div>
       </div>
 
-      <!-- Form Actions -->
       <div class="form-actions">
         <button type="button" id="prevBtn" class="btn btn-back">Back</button>
         <button type="button" id="nextBtn" class="btn btn-next">Next</button>
