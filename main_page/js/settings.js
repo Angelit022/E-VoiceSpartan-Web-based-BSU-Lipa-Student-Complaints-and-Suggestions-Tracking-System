@@ -1,4 +1,3 @@
-
 let originalAccountData = {};
 let originalNotificationData = {};
 let originalPreferencesData = {};
@@ -24,7 +23,119 @@ document.addEventListener('DOMContentLoaded', function() {
             radio.checked = true;
         }
     });
+
+    // Add phone number validation
+    setupPhoneValidation();
 });
+
+function setupPhoneValidation() {
+    const phoneInput = document.getElementById('phoneNumber');
+    
+    if (phoneInput) {
+        // Prevent non-numeric input on keypress
+        phoneInput.addEventListener('keypress', function(e) {
+            // Only allow numbers (0-9)
+            const charCode = e.which ? e.which : e.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Prevent non-numeric input on input event (for copy-paste and other inputs)
+        phoneInput.addEventListener('input', function(e) {
+            // Store cursor position
+            const cursorPos = this.selectionStart;
+            const oldLength = this.value.length;
+            
+            // Remove any non-digit characters
+            this.value = this.value.replace(/[^0-9]/g, '');
+            
+            // Limit to 11 digits
+            if (this.value.length > 11) {
+                this.value = this.value.slice(0, 11);
+            }
+            
+            // Restore cursor position
+            const newLength = this.value.length;
+            const newCursorPos = cursorPos - (oldLength - newLength);
+            this.setSelectionRange(newCursorPos, newCursorPos);
+        });
+
+        // Prevent paste of non-numeric content
+        phoneInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+            const numericOnly = pastedText.replace(/[^0-9]/g, '').slice(0, 11);
+            
+            // Insert at cursor position
+            const start = this.selectionStart;
+            const end = this.selectionEnd;
+            const currentValue = this.value;
+            const newValue = currentValue.substring(0, start) + numericOnly + currentValue.substring(end);
+            
+            this.value = newValue.slice(0, 11);
+            
+            // Set cursor position after pasted content
+            const newCursorPos = Math.min(start + numericOnly.length, 11);
+            this.setSelectionRange(newCursorPos, newCursorPos);
+        });
+
+        // Prevent drag and drop
+        phoneInput.addEventListener('drop', function(e) {
+            e.preventDefault();
+        });
+
+        // Validate on blur
+        phoneInput.addEventListener('blur', function() {
+            validatePhoneNumber(this);
+        });
+    }
+}
+
+function validatePhoneNumber(input) {
+    const phoneNumber = input.value.trim();
+    
+    // Remove any existing error message
+    const existingError = input.parentElement.querySelector('.phone-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    input.classList.remove('input-error');
+    
+    // If empty, it's optional so no error
+    if (phoneNumber === '') {
+        return true;
+    }
+    
+    // Check if it's exactly 11 digits
+    if (phoneNumber.length !== 11) {
+        showPhoneError(input, 'Phone number must be exactly 11 digits');
+        return false;
+    }
+    
+    // Check if it starts with 09
+    if (!phoneNumber.startsWith('09')) {
+        showPhoneError(input, 'Phone number must start with 09');
+        return false;
+    }
+    
+    return true;
+}
+
+function showPhoneError(input, message) {
+    input.classList.add('input-error');
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'phone-error';
+    errorDiv.style.color = '#dc2626';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '0.25rem';
+    errorDiv.textContent = message;
+    
+    input.parentElement.appendChild(errorDiv);
+}
 
 function storeOriginalData() {
     // Store original account data
@@ -111,6 +222,18 @@ function hasFormChanged(formData, originalData) {
 
 async function handleAccountSubmit(event) {
     event.preventDefault();
+    
+    // Validate phone number before submission
+    const phoneInput = document.getElementById('phoneNumber');
+    if (!validatePhoneNumber(phoneInput)) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid Phone Number',
+            text: 'Please enter a valid 11-digit phone number starting with 09',
+            confirmButtonColor: '#c41e3a'
+        });
+        return;
+    }
     
     // Get current form values
     const currentData = {

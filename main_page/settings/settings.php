@@ -84,7 +84,18 @@ $userPreferences = $settingsManager->getPreferences();
                 </div>
                 <div class="form-group">
                     <label for="phoneNumber" data-translate="phoneNumber">Phone Number</label>
-                    <input type="tel" id="phoneNumber" name="phoneNumber" value="<?= htmlspecialchars($student['phone_number'] ?? '') ?>">
+                    <input 
+                        type="text" 
+                        id="phoneNumber" 
+                        name="phoneNumber" 
+                        value="<?= htmlspecialchars($student['phone_number'] ?? '') ?>"
+                        inputmode="numeric"
+                        pattern="[0-9]*"
+                        maxlength="11"
+                        placeholder="09466161074">
+                    <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                        Format: 09XXXXXXXXX (11 digits starting with 09)
+                    </small>
                 </div>
                 <button type="submit" class="btn-save">
                     <i class="bi bi-check-circle"></i> <span data-translate="saveChanges">Update</span>

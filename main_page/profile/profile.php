@@ -231,7 +231,9 @@ $responseType = isset($_GET['type']) ? $_GET['type'] : '';
                       <?php echo $sub['type']; ?>
                     </span>
                     <?php if (!empty($sub['is_anonymous']) && intval($sub['is_anonymous']) === 1): ?>
-                      <span class="badge bg-secondary" title="Submitted anonymously"><i class="bi bi-shield-lock"></i></span>
+                        <span class="badge bg-secondary" title="Submitted anonymously">
+                          <i class="bi bi-incognito"></i>
+                       </span>
                     <?php endif; ?>
                   </td>
                   <td>

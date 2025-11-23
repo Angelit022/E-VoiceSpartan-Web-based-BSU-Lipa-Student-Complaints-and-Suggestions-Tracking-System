@@ -83,7 +83,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="../../images/vata.jpg"; 
+                <img src="./../images/vata.jpg"; 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Angelito Gonzales</h6>
@@ -96,7 +96,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="/E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System/images/team-member-2.jpg" 
+                <img src="./../images/angelica.jpg" 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Angelica Ramirez</h6>
@@ -109,7 +109,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="/E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System/images/team-member-3.jpg" 
+                <img src="./../images/klyza.jpg" 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Klyza Mae Medrazo</h6>
@@ -419,16 +419,31 @@
 </div>
 
 <style>
+/* Footer Styles - Fixed with Silver Gray Background */
 .footer {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #c0c5ce 0%, #a8adb8 100%);
+  color: #2d3748;
   margin-top: auto;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .footer-logo {
   width: 45px;
   height: 45px;
   object-fit: contain;
+}
+
+.footer-brand h5 {
+  color: #d51c1c !important;
+}
+
+.footer h6 {
+  color: #1a202c;
+  font-weight: 700;
+}
+
+.footer p.text-muted {
+  color: #4a5568 !important;
 }
 
 .footer-links {
@@ -440,15 +455,40 @@
 }
 
 .footer-links a {
-  color: #adb5bd;
+  color: #4a5568;
   text-decoration: none;
   transition: all 0.3s ease;
   font-size: 0.9rem;
+  font-weight: 500;
 }
 
 .footer-links a:hover {
-  color: #e63946;
+  color: #d51c1c;
   padding-left: 5px;
+}
+
+/* Fix for copyright section visibility */
+.footer hr.border-secondary {
+  border-color: #8892a0 !important;
+  opacity: 0.5;
+}
+
+.footer .row.align-items-center p {
+  color: #374151 !important;
+  font-weight: 500;
+}
+
+.footer .row.align-items-center p.small {
+  font-size: 0.875rem;
+}
+
+/* Ensure bottom section is visible */
+.footer .container > .row:last-child {
+  margin-top: 1rem;
+}
+
+.footer .container > .row:last-child p {
+  color: #1f2937 !important;
 }
 
 /* Modal Enhancements */
@@ -480,7 +520,7 @@
 
 .team-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(230, 57, 70, 0.15);
+  box-shadow: 0 8px 20px rgba(213, 28, 28, 0.15);
 }
 
 .team-img-wrapper {
@@ -494,7 +534,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border: 4px solid #e63946;
+  border: 4px solid #d51c1c;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -503,7 +543,7 @@
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 8px;
-  border-left: 4px solid #e63946;
+  border-left: 4px solid #d51c1c;
 }
 
 /* Responsive Adjustments */
@@ -545,7 +585,7 @@
 .modal-dialog-scrollable .modal-body {
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: #e63946 #f1f1f1;
+  scrollbar-color: #d51c1c #f1f1f1;
 }
 
 .modal-dialog-scrollable .modal-body::-webkit-scrollbar {
@@ -558,11 +598,11 @@
 }
 
 .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb {
-  background: #e63946;
+  background: #d51c1c;
   border-radius: 10px;
 }
 
 .modal-dialog-scrollable .modal-body::-webkit-scrollbar-thumb:hover {
-  background: #d32f3e;
+  background: #a01515;
 }
 </style>

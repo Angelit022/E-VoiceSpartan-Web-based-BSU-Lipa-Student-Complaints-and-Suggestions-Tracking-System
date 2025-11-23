@@ -112,7 +112,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
           </div>
           <div class="col-lg-6">
             <div class="placeholder-image">
-              <img src="../images/bsu.jpg" alt="BSU" style="height: 400px; width: 700px;">
+              <img src="../images/tower.jpg" alt="BSU" style="height: 700px; width: 700px;">
             </div>
           </div>
         </div>

@@ -2,6 +2,28 @@
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
+// Get student information from database
+$studentName = "Student Name";
+$studentEmail = "student@gsuite.bsu.edu.ph";
+
+if (isset($_SESSION['user_id'])) {
+    require_once(__DIR__ . '/../../db.php');
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    $stmt = $db->prepare("SELECT first_name, last_name, email FROM student WHERE student_id = ?");
+    $stmt->bind_param("s", $_SESSION['user_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($row = $result->fetch_assoc()) {
+        $studentName = ucfirst($row['first_name']) . ' ' . ucfirst($row['last_name']);
+        $studentEmail = $row['email'];
+    }
+    
+    $stmt->close();
+}
+
 function get_nav_path($target_page) {
     $current_dir = basename(dirname($_SERVER['PHP_SELF']));
     $is_main_page = $current_dir === 'main_page' || $current_dir === 'components' || $current_dir === 'css' || $current_dir === 'js' || $current_dir === 'classes';
@@ -105,8 +127,8 @@ function is_active($page_name) {
   </div>
 
   <div class="right-menu-footer mt-auto pt-3 border-top">
-    <p class="fw-semibold mb-2">Angelito Gonzales</p>
-    <small class="text-muted">angelito.gonzales@gsuite.bsu.edu.ph</small>
+    <p class="fw-semibold mb-2"><?php echo htmlspecialchars($studentName); ?></p>
+    <small class="text-muted"><?php echo htmlspecialchars($studentEmail); ?></small>
     <a href="#" class="logout-btn-right" id="logoutBtnRight">
       <i class="bi bi-box-arrow-right"></i> Logout
     </a>
@@ -117,7 +139,7 @@ function is_active($page_name) {
 
 <div id="sidebarMenu" class="sidebar">
   <div class="sidebar-header d-flex justify-content-between align-items-center">
-    <h5 class="m-0 fw-bold text-danger">NAVIGATION</h5>
+    <h5 class="m-0 fw-bold text-danger">MENU</h5>
     <button class="close-btn"><i class="bi bi-x-lg"></i></button>
   </div>
 
@@ -145,8 +167,8 @@ function is_active($page_name) {
   </div>
 
   <div class="sidebar-footer mt-auto pt-3 border-top">
-    <p class="fw-semibold mb-2">NAME OF STUDENT(SOON)</p>
-    <small class="text-muted">23-1234@gsuite.bsu.edu.ph</small>
+    <p class="fw-semibold mb-2"><?php echo htmlspecialchars($studentName); ?></p>
+    <small class="text-muted"><?php echo htmlspecialchars($studentEmail); ?></small>
     <a href="#" class="logout-btn-right" id="logoutBtnSidebar">
       <i class="bi bi-box-arrow-right"></i> Logout
     </a>

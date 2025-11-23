@@ -189,7 +189,7 @@ if (!isset($_SESSION['user_id'])) {
       <div class="form-actions">
         <button type="button" id="prevBtn" class="btn btn-back">Back</button>
         <button type="button" id="nextBtn" class="btn btn-next">Next</button>
-        <button type="button" id="submitBtn" class="btn btn-success" style="display: none;">Submit Complaint</button>
+        <button type="button" id="submitBtn" class="btn btn-success" style="display: none;"><i class="bi bi-check-circle"></i> Submit Complaint</button>
         <button type="button" id="doneBtn" class="btn btn-success" style="display: none;">Done</button>
       </div>
     </form>

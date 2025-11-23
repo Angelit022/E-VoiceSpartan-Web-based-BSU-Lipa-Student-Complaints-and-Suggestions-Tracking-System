@@ -1,4 +1,4 @@
-/* Clean Edit Submission Modal Styles - Professional Black Theme */
+/* Clean Edit Submission Modal Styles - Professional Yellow Theme */
 
 .edit-submission-container {
   background: #ffffff;
@@ -6,6 +6,7 @@
   padding: 2rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid #e5e7eb;
+  pointer-events: auto; /* CRITICAL: Enable interactions */
 }
 
 /* Form Sections */
@@ -21,22 +22,23 @@
   border-bottom: none;
 }
 
-/* Form Labels - Clean Black */
+/* Form Labels - Yellow Theme */
 #editForm .form-label {
   font-weight: 700;
   font-size: 0.875rem;
-  color: #1a1a2e;
+  color: #d97706;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  pointer-events: none; /* Labels don't need clicks */
 }
 
 #editForm .form-label i {
   font-size: 1.1rem;
-  color: #6c757d;
+  color: #f59e0b;
 }
 
 /* Enhanced Form Controls */
@@ -49,18 +51,26 @@
   font-size: 1rem;
   background: white;
   color: #1a1a2e;
+  pointer-events: auto !important; /* CRITICAL: Enable input */
+  cursor: text !important;
 }
 
 #editForm .form-control:focus,
 #editForm .form-select:focus {
-  border-color: #1a1a2e;
-  box-shadow: 0 0 0 0.25rem rgba(26, 26, 46, 0.1);
+  border-color: #fbbf24;
+  box-shadow: 0 0 0 0.25rem rgba(251, 191, 36, 0.25);
   background: white;
+  outline: none;
+}
+
+#editForm .form-select {
+  cursor: pointer !important;
 }
 
 #editForm textarea.form-control {
   min-height: 150px;
   resize: vertical;
+  cursor: text !important;
 }
 
 /* Type Badge - Keep original colors for type identification */
@@ -121,9 +131,9 @@
   justify-content: space-between;
   margin-bottom: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: #fffbeb;
   border-radius: 12px;
-  border: 2px dashed #dee2e6;
+  border: 2px dashed #fbbf24;
 }
 
 .attachments-title {
@@ -131,7 +141,7 @@
   align-items: center;
   gap: 0.625rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #d97706;
   margin: 0;
   font-size: 1rem;
   text-transform: uppercase;
@@ -139,23 +149,22 @@
 }
 
 .add-attachment-btn {
-  background: #1a1a2e;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: white;
   border: none;
   border-radius: 10px;
   padding: 0.625rem 1.25rem;
   font-size: 0.875rem;
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(26, 26, 46, 0.2);
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 700;
   position: relative;
   overflow: hidden;
-  /* added pointer-events for modal interaction */
-  pointer-events: auto;
+  pointer-events: auto !important; /* CRITICAL */
 }
 
 .add-attachment-btn::before {
@@ -166,7 +175,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
 }
@@ -178,14 +187,18 @@
 
 .add-attachment-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(26, 26, 46, 0.3);
-  background: #2a2a3e;
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.add-attachment-btn:active {
+  transform: translateY(0);
 }
 
 .add-attachment-btn:disabled {
   background: #e5e7eb;
   color: #9ca3af;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
   box-shadow: none;
 }
 
@@ -193,6 +206,7 @@
 .add-attachment-btn span {
   position: relative;
   z-index: 1;
+  pointer-events: none;
 }
 
 /* Attachment Items */
@@ -207,8 +221,7 @@
   transition: all 0.3s ease;
   border: 2px solid #e5e7eb;
   animation: slideIn 0.3s ease;
-  /* added pointer-events for modal interaction */
-  pointer-events: auto;
+  pointer-events: auto !important; /* CRITICAL */
 }
 
 @keyframes slideIn {
@@ -223,8 +236,8 @@
 }
 
 .attachment-item:hover {
-  border-color: #1a1a2e;
-  box-shadow: 0 4px 16px rgba(26, 26, 46, 0.1);
+  border-color: #fbbf24;
+  box-shadow: 0 4px 16px rgba(251, 191, 36, 0.2);
   transform: translateX(4px);
 }
 
@@ -240,11 +253,12 @@
   gap: 1rem;
   flex: 1;
   min-width: 0;
+  pointer-events: none;
 }
 
 .attachment-info i {
   font-size: 1.75rem;
-  color: #6c757d;
+  color: #f59e0b;
   flex-shrink: 0;
 }
 
@@ -262,15 +276,14 @@
   background: none;
   border: none;
   color: #ef4444;
-  cursor: pointer;
+  cursor: pointer !important;
   font-size: 1.75rem;
-  padding: 0 0.5rem;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   transition: all 0.3s ease;
   flex-shrink: 0;
-  /* added pointer-events for modal interaction */
-  pointer-events: auto;
+  pointer-events: auto !important; /* CRITICAL */
 }
 
 .delete-attachment-btn:hover,
@@ -279,20 +292,25 @@
   transform: scale(1.2);
 }
 
+.delete-attachment-btn:active,
+.btn-remove-file:active {
+  transform: scale(1.1);
+}
+
 .delete-attachment-btn:disabled,
 .btn-remove-file:disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 /* New File Preview */
 .new-file-preview {
-  background: linear-gradient(135deg, rgba(26, 26, 46, 0.05) 0%, rgba(26, 26, 46, 0.02) 100%);
-  border-left: 4px solid #1a1a2e;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.08) 0%, rgba(251, 191, 36, 0.03) 100%);
+  border-left: 4px solid #fbbf24;
 }
 
 .new-file-preview .attachment-name {
-  color: #1a1a2e;
+  color: #d97706;
   font-weight: 700;
 }
 
@@ -314,7 +332,7 @@
   display: block;
 }
 
-/* Button Group - Updated with right-aligned Update button */
+/* Button Group - Yellow Theme */
 #editForm .d-flex.gap-2 {
   margin-top: 2rem;
   padding-top: 2rem;
@@ -322,7 +340,7 @@
   display: flex;
   gap: 1rem;
   justify-content: space-between;
-  flex-direction: row-reverse; /* Reverses order to put Update on right */
+  flex-direction: row-reverse;
 }
 
 #editForm .btn {
@@ -339,8 +357,8 @@
   position: relative;
   overflow: hidden;
   flex: 1;
-  /* added pointer-events for modal interaction */
-  pointer-events: auto;
+  pointer-events: auto !important; /* CRITICAL */
+  cursor: pointer !important;
 }
 
 #editForm .btn::before {
@@ -351,7 +369,7 @@
   width: 0;
   height: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.3);
   transform: translate(-50%, -50%);
   transition: width 0.6s, height 0.6s;
 }
@@ -365,21 +383,26 @@
 #editForm .btn span {
   position: relative;
   z-index: 1;
+  pointer-events: none;
 }
 
-/* Update Button - Black/Dark */
+/* Update Button - Yellow/Orange */
 #editForm .btn-danger {
-  background: linear-gradient(135deg, #1a1a2e 0%, #2a2a3e 100%) !important;
-  box-shadow: 0 4px 12px rgba(26, 26, 46, 0.3);
-  border: 2px solid #1a1a2e;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+  border: 2px solid #fbbf24;
   color: white !important;
 }
 
 #editForm .btn-danger:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2a2a3e 0%, #3a3a4e 100%) !important;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(26, 26, 46, 0.4);
-  border-color: #2a2a3e;
+  box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+  border-color: #f59e0b;
+}
+
+#editForm .btn-danger:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 /* Cancel Button - Light Gray */
@@ -398,9 +421,13 @@
   color: #374151 !important;
 }
 
+#editForm .btn-secondary:active {
+  transform: translateY(0);
+}
+
 #editForm .btn:disabled {
   opacity: 0.6;
-  cursor: not-allowed;
+  cursor: not-allowed !important;
   transform: none !important;
 }
 
@@ -409,6 +436,11 @@
   width: 1.25rem;
   height: 1.25rem;
   border-width: 0.2em;
+}
+
+/* Hidden file input */
+input[type="file"] {
+  pointer-events: auto !important;
 }
 
 /* Responsive Adjustments */
@@ -434,6 +466,7 @@
   .add-attachment-btn {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
+    width: 100%;
   }
 
   #editForm .btn {

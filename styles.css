@@ -195,7 +195,7 @@ header .text-group h2 {
   font-size: 15px;
   line-height: 1.8;
   color: #444;
-  margin-bottom: 1px;
+  margin-bottom: 20px;
 }
 
 /* Navigation Button */
@@ -396,12 +396,112 @@ footer {
   .logo-divider {
     height: 70px;
   }
+
+  /* Right Content - Hexagon Grid */
+.right-content {
+  flex: 0 0 50%;
+  position: relative;
+  min-height: 500px;
+}
+
   
-  .hexagon-wrapper, .hexagon-empty {
-    width: 190px;
-    height: 165px;
-  }
-  
+/* Hexagon positioning */
+.hexagon-wrapper,
+.hexagon-empty {
+  position: absolute;
+}
+
+/* Top row - 2 hexagons */
+.hexagon-wrapper:nth-child(1) {
+  top: 133px;
+  left: -55px;
+}
+
+.hexagon-wrapper:nth-child(2) {
+  top: -120px;
+  left: 105px;
+}
+
+/* Middle row - 3 hexagons */
+.hexagon-wrapper:nth-child(3) { 
+  top: -110px;
+  left: 105px;
+}
+
+.hexagon-empty:nth-child(4) {
+  top: 310px;
+  left: -55px;
+}
+
+.hexagon-empty:nth-child(5) {
+   top: 133px;
+  left: 265px;
+}
+
+/* Hexagon Shape */
+.hexagon-wrapper {
+  width: 200px;
+  height: 165px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.25);
+}
+
+.hexagon-wrapper:hover {
+  transform: scale(1.08) translateY(-5px);
+  box-shadow: 0 20px 40px rgba(210, 31, 38, 0.4);
+  z-index: 10;
+}
+
+.hexagon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.7s ease;
+  user-select: none;
+}
+
+.hexagon-wrapper img.img1 {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hexagon-wrapper img.img2 {
+  opacity: 0;
+  z-index: 1;
+}
+
+.hexagon-wrapper.active-transition img.img1 {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+.hexagon-wrapper.active-transition img.img2 {
+  opacity: 1;
+  transform: scale(1.1);
+  z-index: 3;
+}
+
+/* Empty hexagon with red background */
+.hexagon-empty {
+  width: 200px;
+  height: 165px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(135deg, #d21f26 0%, #a01820 100%);
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.3);
+  transition: all 0.4s ease;
+}
+
+.hexagon-empty:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(210, 31, 38, 0.45);
+}
   .subtitle {
     font-size: 11px;
     letter-spacing: 1.5px;
@@ -458,10 +558,112 @@ footer {
     height: 60px;
   }
   
-  .hexagon-wrapper, .hexagon-empty {
-    width: 160px;
-    height: 138px;
-  }
+ 
+  /* Right Content - Hexagon Grid */
+.right-content {
+  flex: 0 0 50%;
+  position: relative;
+  min-height: 500px;
+}
+
+  
+/* Hexagon positioning */
+.hexagon-wrapper,
+.hexagon-empty {
+  position: absolute;
+}
+
+/* Top row - 2 hexagons */
+.hexagon-wrapper:nth-child(1) {
+  top: 133px;
+  left: -55px;
+}
+
+.hexagon-wrapper:nth-child(2) {
+  top: -120px;
+  left: 105px;
+}
+
+/* Middle row - 3 hexagons */
+.hexagon-wrapper:nth-child(3) { 
+  top: -110px;
+  left: 105px;
+}
+
+.hexagon-empty:nth-child(4) {
+  top: 310px;
+  left: -55px;
+}
+
+.hexagon-empty:nth-child(5) {
+   top: 133px;
+  left: 265px;
+}
+
+/* Hexagon Shape */
+.hexagon-wrapper {
+  width: 200px;
+  height: 165px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.25);
+}
+
+.hexagon-wrapper:hover {
+  transform: scale(1.08) translateY(-5px);
+  box-shadow: 0 20px 40px rgba(210, 31, 38, 0.4);
+  z-index: 10;
+}
+
+.hexagon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.7s ease;
+  user-select: none;
+}
+
+.hexagon-wrapper img.img1 {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hexagon-wrapper img.img2 {
+  opacity: 0;
+  z-index: 1;
+}
+
+.hexagon-wrapper.active-transition img.img1 {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+.hexagon-wrapper.active-transition img.img2 {
+  opacity: 1;
+  transform: scale(1.1);
+  z-index: 3;
+}
+
+/* Empty hexagon with red background */
+.hexagon-empty {
+  width: 200px;
+  height: 165px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(135deg, #d21f26 0%, #a01820 100%);
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.3);
+  transition: all 0.4s ease;
+}
+
+.hexagon-empty:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(210, 31, 38, 0.45);
+}
   
   .subtitle {
     font-size: 10px;
@@ -523,10 +725,110 @@ footer {
     height: 50px;
   }
   
-  .hexagon-wrapper, .hexagon-empty {
-    width: 140px;
-    height: 121px;
-  }
+/* Right Content - Hexagon Grid */
+.right-content {
+  flex: 0 0 55%;
+  position: relative;
+  min-height: 500px;
+}
+
+/* Hexagon positioning */
+.hexagon-wrapper,
+.hexagon-empty {
+  position: absolute;
+}
+
+/* Top row - 2 hexagons */  
+.hexagon-wrapper:nth-child(1) {
+  top: 363px;
+  left: -260px;
+}
+
+.hexagon-wrapper:nth-child(2) {
+  top: 170px;
+  left: -130px;
+}
+
+/* Middle row - 3 hexagons */
+.hexagon-wrapper:nth-child(3) { 
+  top: 180px;
+  left: -130px;
+}
+
+.hexagon-empty:nth-child(4) {
+  top: 498px;
+  left: -260px;
+}
+
+.hexagon-empty:nth-child(5) {
+  top: 363px;
+  left: 1px;
+}
+
+/* Hexagon Shape */
+.hexagon-wrapper {
+  width: 160px;
+  height: 125px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.25);
+}
+
+.hexagon-wrapper:hover {
+  transform: scale(1.08) translateY(-5px);
+  box-shadow: 0 20px 40px rgba(210, 31, 38, 0.4);
+  z-index: 10;
+}
+
+.hexagon-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: all 0.7s ease;
+  user-select: none;
+}
+
+.hexagon-wrapper img.img1 {
+  opacity: 1;
+  z-index: 2;
+}
+
+.hexagon-wrapper img.img2 {
+  opacity: 0;
+  z-index: 1;
+}
+
+.hexagon-wrapper.active-transition img.img1 {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+.hexagon-wrapper.active-transition img.img2 {
+  opacity: 1;
+  transform: scale(1.1);
+  z-index: 3;
+}
+
+/* Empty hexagon with red background */
+.hexagon-empty {
+  width: 160px;
+  height: 125px;
+  clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+  background: linear-gradient(135deg, #d21f26 0%, #a01820 100%);
+  box-shadow: 0 10px 25px rgba(210, 31, 38, 0.3);
+  transition: all 0.4s ease;
+}
+
+.hexagon-empty:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(210, 31, 38, 0.45);
+}
   
   .subtitle {
     font-size: 9px;

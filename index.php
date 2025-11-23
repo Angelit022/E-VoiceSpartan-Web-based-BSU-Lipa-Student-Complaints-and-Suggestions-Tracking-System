@@ -46,7 +46,7 @@
         </p>
 
         <div class="description">
-          <p>A web-based complaints and suggestions tracking system that integrates security, communication, and analytics in one platform. Providing students with a structured portal to submit complaints or suggestions with optional anonymity, secured by Two-Factor Authentication.</p>
+          <p>Your voice matters. Make a difference in your campus experience. Share your thoughts, drive positive change, and help build a better university community. Join fellow Spartans in shaping the future—speak up today!</p>
         </div>
 
         <a href="signup_login/login.php" class="nav-button">Get Started</a>
@@ -55,18 +55,18 @@
       <div class="right-content">
         <!-- Top row: 2 hexagons with images -->
         <div class="hexagon-wrapper">
-          <img class="img1" src="images/complaint.webp" alt="University Library" />
-          <img class="img2" src="images/suggestion.webp" alt="University Campus" />
+          <img class="img1" src="images/complaintTEXT.jpg" alt="complaint" />
+          <img class="img2" src="images/sumisigawSiAte.webp" alt="si ate nasigaw" />
         </div>
         <div class="hexagon-wrapper">
-          <img class="img1" src="images/suggestion 2.webp" alt="Building View" />
-          <img class="img2" src="images/image1.webp" alt="Campus Facilities" />
+          <img class="img1" src="images/suggestioning.avif" alt="suggestion" />
+          <img class="img2" src="images/complaintdigital.jpg" alt="complaint" />
         </div>
         
         <!-- Bottom row: 1 hexagon with image + 2 red hexagons -->
         <div class="hexagon-wrapper">
-          <img class="img1" src="images/bg.jpg" alt="Library Interior" />
-          <img class="img2" src="images/bsu.jpg" alt="Study Areas" />
+          <img class="img1" src="images/meetingDeAbanse.jpg" alt="meeting" />
+          <img class="img2" src="images/complaint.webp" alt="complaint" />
         </div>
         <div class="hexagon-empty"></div>
         <div class="hexagon-empty"></div>
