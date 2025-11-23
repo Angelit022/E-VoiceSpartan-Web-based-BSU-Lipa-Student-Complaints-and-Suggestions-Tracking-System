@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $email_or_id = trim($_POST['student_id'] ?? '');
 $password = trim($_POST['password'] ?? '');
 
+error_log("[login_handler] Login attempt - Email/ID: $email_or_id");
+
 if ($email_or_id === '' || $password === '') {
     echo json_encode(['status' => false, 'message' => 'ID/Email and password are required']);
     exit;
@@ -20,11 +22,19 @@ if ($email_or_id === '' || $password === '') {
 
 $adminAuth = new AdminAuthService();
 if ($adminAuth->isAdminEmail($email_or_id)) {
+    error_log("[login_handler] Detected as admin email");
+    
     $adminResult = $adminAuth->authenticateAdmin($email_or_id, $password);
 
     if ($adminResult['status'] === true && isset($adminResult['data'])) {
         $admin = $adminResult['data'];
         $contact = $adminAuth->getAdminContactInfo($email_or_id);
+
+        if (!$contact) {
+            error_log("[login_handler] Admin contact info not found");
+            echo json_encode(['status' => false, 'message' => 'Admin account not found']);
+            exit;
+        }
 
         $_SESSION['authUser'] = $admin['email'];
         $_SESSION['admin_id'] = $admin['admin_id'];
@@ -35,6 +45,8 @@ if ($adminAuth->isAdminEmail($email_or_id)) {
         $_SESSION['logged_in'] = false;
         $_SESSION['is_admin'] = true;
 
+        error_log("[login_handler] Admin session created - ID: {$admin['admin_id']}, Role: {$admin['role']}");
+
         echo json_encode([
             'status' => true,
             'message' => 'OTP verification required for admin',
@@ -43,6 +55,7 @@ if ($adminAuth->isAdminEmail($email_or_id)) {
         exit;
     }
 
+    error_log("[login_handler] Admin authentication failed: " . ($adminResult['message'] ?? 'Unknown error'));
     echo json_encode([
         'status' => false,
         'message' => $adminResult['message'] ?? 'Invalid admin credentials',
@@ -51,6 +64,7 @@ if ($adminAuth->isAdminEmail($email_or_id)) {
     exit;
 }
 
+error_log("[login_handler] Attempting student login");
 $studentService = new StudentService();
 $result = $studentService->loginStudent($email_or_id, $password);
 
@@ -81,6 +95,8 @@ if ($result['status'] === true && isset($result['data'])) {
     $_SESSION['logged_in'] = false;
     $_SESSION['is_admin'] = false;
 
+    error_log("[login_handler] Student session created - ID: {$student['student_id']}");
+
     echo json_encode([
         'status' => true,
         'message' => 'OTP verification required',
@@ -89,6 +105,7 @@ if ($result['status'] === true && isset($result['data'])) {
     exit;
 }
 
+error_log("[login_handler] Login failed - neither admin nor student");
 echo json_encode([
     'status' => false,
     'message' => $result['message'] ?? 'Invalid credentials'

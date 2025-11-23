@@ -13,21 +13,21 @@ const STATUS_FLOW = {
   1: [2], // Pending can only go to In Progress
   2: [3, 4], // In Progress can go to Resolved or Rejected
   3: [], // Resolved is final
-  4: [] // Rejected is final
+  4: [], // Rejected is final
 }
 
 const STATUS_NAMES = {
-  1: 'Pending',
-  2: 'In Progress',
-  3: 'Resolved',
-  4: 'Rejected'
+  1: "Pending",
+  2: "In Progress",
+  3: "Resolved",
+  4: "Rejected",
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   initializeModals()
   initializeTable()
   initializeEventListeners()
-  
+
   if (document.getElementById("reportTableBody")?.querySelectorAll("tr").length > 0) {
     displayPage(1)
   }
@@ -41,24 +41,24 @@ function initializeModals() {
 
     if (detailsModalEl && bootstrap) {
       detailsModal = new bootstrap.Modal(detailsModalEl, {
-        backdrop: 'static',
-        keyboard: false
+        backdrop: true,
+        keyboard: true,
       })
     }
     if (responseModalEl && bootstrap) {
       responseModal = new bootstrap.Modal(responseModalEl, {
-        backdrop: 'static',
-        keyboard: false
+        backdrop: true,
+        keyboard: true,
       })
     }
     if (statusModalEl && bootstrap) {
       statusModal = new bootstrap.Modal(statusModalEl, {
-        backdrop: 'static',
-        keyboard: false
+        backdrop: true,
+        keyboard: true,
       })
     }
   } catch (error) {
-    console.error('Error initializing modals:', error)
+    console.error("Error initializing modals:", error)
   }
 }
 
@@ -117,9 +117,15 @@ function sortTable(order) {
 
   const sortAsc = document.getElementById("sortAsc")
   const sortDesc = document.getElementById("sortDesc")
-  
-  if (sortAsc) sortAsc.classList.toggle("active", order === "asc")
-  if (sortDesc) sortDesc.classList.toggle("active", order === "desc")
+
+  if (sortAsc) {
+    sortAsc.classList.remove("active")
+    if (order === "asc") sortAsc.classList.add("active")
+  }
+  if (sortDesc) {
+    sortDesc.classList.remove("active")
+    if (order === "desc") sortDesc.classList.add("active")
+  }
 
   filteredRows.sort((a, b) => {
     const dateA = Number.parseInt(a.getAttribute("data-date")) || 0
@@ -150,7 +156,7 @@ function displayPage(pageNum) {
   const startRowEl = document.getElementById("startRow")
   const endRowEl = document.getElementById("endRow")
   const totalRowsEl = document.getElementById("totalRows")
-  
+
   if (startRowEl) startRowEl.textContent = filteredRows.length === 0 ? 0 : start + 1
   if (endRowEl) endRowEl.textContent = end
   if (totalRowsEl) totalRowsEl.textContent = filteredRows.length
@@ -231,48 +237,59 @@ function resetFilters() {
   const searchInput = document.getElementById("searchInput")
   const typeFilter = document.getElementById("typeFilter")
   const statusFilter = document.getElementById("statusFilter")
-  
+
   if (searchInput) searchInput.value = ""
   if (typeFilter) typeFilter.value = ""
   if (statusFilter) statusFilter.value = ""
-  
+
   filterAndPaginate()
 }
 
 function parseAttachments(attachmentsStr) {
   if (!attachmentsStr) return []
-  
+
   const attachments = []
-  const parts = attachmentsStr.split(';;')
-  
+  const parts = attachmentsStr.split(";;")
+
   for (const part of parts) {
-    const fields = part.split('|')
+    const fields = part.split("|")
     if (fields.length === 3) {
       attachments.push({
         id: fields[0],
         path: fields[1],
         type: fields[2],
-        filename: fields[1].split('/').pop()
+        filename: fields[1].split("/").pop(),
       })
     }
   }
-  
+
   return attachments
 }
 
 function getFileIcon(fileType) {
-  if (fileType.includes('image')) return 'bi-file-image text-primary'
-  if (fileType.includes('pdf')) return 'bi-file-pdf text-danger'
-  if (fileType.includes('word') || fileType.includes('document')) return 'bi-file-word text-info'
-  if (fileType.includes('excel') || fileType.includes('spreadsheet')) return 'bi-file-excel text-success'
-  return 'bi-file-earmark text-secondary'
+  if (fileType.includes("image")) return "bi-file-image text-primary"
+  if (fileType.includes("pdf")) return "bi-file-pdf text-danger"
+  if (fileType.includes("word") || fileType.includes("document")) return "bi-file-word text-info"
+  if (fileType.includes("excel") || fileType.includes("spreadsheet")) return "bi-file-excel text-success"
+  return "bi-file-earmark text-secondary"
 }
 
 function viewDetails(submission) {
   try {
+    console.log("[v0] viewDetails called with submission:", submission)
+
+    // Validate submission object
+    if (!submission) {
+      showAlert("error", "Error", "Invalid submission data")
+      return
+    }
+
     const studentSection = document.getElementById("detailStudentSection")
-    
-    if (submission.is_anonymous == 1 || submission.is_anonymous === true) {
+
+    const isAnonymous =
+      submission.is_anonymous == 1 || submission.is_anonymous === true || submission.is_anonymous === "1"
+
+    if (isAnonymous) {
       if (studentSection) {
         studentSection.innerHTML = `
           <div class="col-12">
@@ -285,55 +302,67 @@ function viewDetails(submission) {
       }
     } else {
       if (studentSection) {
+        const studentName = `${submission.first_name || ""} ${submission.last_name || ""}`.trim()
+        const email = submission.email || "N/A"
         studentSection.innerHTML = `
           <div class="col-md-6">
             <strong>Student Name:</strong>
-            <p id="detailStudentName" class="mb-2">${submission.first_name} ${submission.last_name}</p>
+            <p id="detailStudentName" class="mb-2">${escapeHtml(studentName)}</p>
           </div>
           <div class="col-md-6">
             <strong>Email:</strong>
-            <p id="detailEmail" class="mb-2">${submission.email}</p>
+            <p id="detailEmail" class="mb-2">${escapeHtml(email)}</p>
           </div>
         `
       }
     }
-    
+
     const detailTitle = document.getElementById("detailTitle")
     const detailCategory = document.getElementById("detailCategory")
     const detailDescription = document.getElementById("detailDescription")
-    
-    if (detailTitle) detailTitle.textContent = submission.title
-    if (detailCategory) detailCategory.textContent = submission.category
-    if (detailDescription) detailDescription.textContent = submission.description
-    
+
+    if (detailTitle) {
+      detailTitle.textContent = submission.title || "N/A"
+    }
+    if (detailCategory) {
+      detailCategory.textContent = submission.category || "N/A"
+    }
+    if (detailDescription) {
+      detailDescription.textContent = submission.description || "No description provided"
+    }
+
     const attachments = parseAttachments(submission.attachments)
     const attachmentsSection = document.getElementById("detailAttachmentsSection")
     const attachmentsContainer = document.getElementById("detailAttachments")
-    
+
     if (attachments.length > 0 && attachmentsContainer) {
-      attachmentsContainer.innerHTML = attachments.map(att => `
+      attachmentsContainer.innerHTML = attachments
+        .map(
+          (att) => `
         <div class="d-flex align-items-center mb-2 p-2 border rounded">
           <i class="bi ${getFileIcon(att.type)} fs-4 me-3"></i>
           <div class="flex-grow-1">
-            <div class="fw-semibold">${att.filename}</div>
-            <small class="text-muted">${att.type}</small>
+            <div class="fw-semibold">${escapeHtml(att.filename)}</div>
+            <small class="text-muted">${escapeHtml(att.type)}</small>
           </div>
-          <a href="../${att.path}" target="_blank" class="btn btn-sm btn-outline-primary">
+          <a href="${escapeHtml(att.path)}" target="_blank" class="btn btn-sm btn-outline-primary">
             <i class="bi bi-download"></i> Download
           </a>
         </div>
-      `).join('')
-      if (attachmentsSection) attachmentsSection.style.display = 'block'
+      `,
+        )
+        .join("")
+      if (attachmentsSection) attachmentsSection.style.display = "block"
     } else {
-      if (attachmentsSection) attachmentsSection.style.display = 'none'
+      if (attachmentsSection) attachmentsSection.style.display = "none"
     }
-    
+
     if (detailsModal) {
       detailsModal.show()
     }
   } catch (error) {
-    console.error('Error in viewDetails:', error)
-    showAlert('error', 'Error opening details: ' + error.message)
+    console.error("[v0] Error in viewDetails:", error)
+    showAlert("error", "Error opening details: " + error.message)
   }
 }
 
@@ -341,12 +370,16 @@ function openResponseModal(submission) {
   try {
     // Check status first
     if (submission.status_name !== "In Progress") {
-      showAlert('warning', 'Cannot Respond', 'You can only respond to submissions with "In Progress" status. Please update the status first.')
+      showAlert(
+        "warning",
+        "Cannot Respond",
+        'You can only respond to submissions with "In Progress" status. Please update the status first.',
+      )
       return
     }
 
     const isAnonymous = submission.is_anonymous == 1 || submission.is_anonymous === true
-    
+
     // Get all modal elements
     const responseSubmissionId = document.getElementById("responseSubmissionId")
     const responseSubmissionType = document.getElementById("responseSubmissionType")
@@ -356,112 +389,119 @@ function openResponseModal(submission) {
     const responseSubject = document.getElementById("responseSubject")
     const responseMessage = document.getElementById("responseMessage")
     const charCount = document.getElementById("charCount")
-    const alertDiv = document.querySelector('#responseModal .alert')
-    
+    const alertDiv = document.querySelector("#responseModal .alert")
+
     // Validate critical elements exist
     if (!responseSubmissionId || !responseSubmissionType || !responseStudentId) {
-      showAlert('error', 'Error', 'Modal not properly initialized. Please refresh the page.')
+      showAlert("error", "Error", "Modal not properly initialized. Please refresh the page.")
       return
     }
-    
+
     // Set hidden fields
     responseSubmissionId.value = submission.id
     responseSubmissionType.value = submission.type
     responseStudentId.value = submission.student_id
-    
+
     // Set visible fields based on anonymous status
     if (isAnonymous) {
       if (responseStudentName) responseStudentName.textContent = "Anonymous Student"
       if (responseStudentEmail) responseStudentEmail.value = "(Anonymous - No email)"
       if (responseSubject) responseSubject.value = "Re: " + submission.title + " (Anonymous)"
-      
+
       if (alertDiv) {
-        alertDiv.innerHTML = '<i class="bi bi-exclamation-triangle me-2"></i><strong>Note:</strong> This is an anonymous submission. The response will be logged but notifications may be limited.'
-        alertDiv.className = 'alert alert-warning'
+        alertDiv.innerHTML =
+          '<i class="bi bi-exclamation-triangle me-2"></i><strong>Note:</strong> This is an anonymous submission. The response will be logged but notifications may be limited.'
+        alertDiv.className = "alert alert-warning"
       }
     } else {
       if (responseStudentName) responseStudentName.textContent = `${submission.first_name} ${submission.last_name}`
       if (responseStudentEmail) responseStudentEmail.value = submission.email
       if (responseSubject) responseSubject.value = "Re: " + submission.title
-      
+
       if (alertDiv) {
         alertDiv.innerHTML = `<i class="bi bi-info-circle me-2"></i><strong>Responding to:</strong> ${submission.first_name} ${submission.last_name}`
-        alertDiv.className = 'alert alert-info'
+        alertDiv.className = "alert alert-info"
       }
     }
-    
+
     // Clear message and reset counter
     if (responseMessage) responseMessage.value = ""
     if (charCount) charCount.textContent = "0"
-    
+
     // Show modal
     if (responseModal) {
       responseModal.show()
     }
   } catch (error) {
-    console.error('Error in openResponseModal:', error)
-    showAlert('error', 'Error', 'Error opening response modal: ' + error.message)
+    console.error("Error in openResponseModal:", error)
+    showAlert("error", "Error", "Error opening response modal: " + error.message)
   }
 }
 
 function updateStatus(submissionId, type, currentStatusId) {
   try {
-    const currentStatus = parseInt(currentStatusId)
-    
+    const currentStatus = Number.parseInt(currentStatusId)
+
     // Check if status is final (Resolved or Rejected)
     if (currentStatus === 3 || currentStatus === 4) {
-      showAlert('info', 'Status Cannot Be Changed', `This submission is already ${STATUS_NAMES[currentStatus]}. Final statuses cannot be changed.`)
+      showAlert(
+        "info",
+        "Status Cannot Be Changed",
+        `This submission is already ${STATUS_NAMES[currentStatus]}. Final statuses cannot be changed.`,
+      )
       return
     }
-    
+
     const statusSubmissionId = document.getElementById("statusSubmissionId")
     const statusSubmissionType = document.getElementById("statusSubmissionType")
     const statusCurrentStatusId = document.getElementById("statusCurrentStatusId")
     const currentStatusDisplay = document.getElementById("currentStatusDisplay")
     const newStatusSelect = document.getElementById("newStatus")
-    
+
     if (!statusSubmissionId || !statusSubmissionType || !statusCurrentStatusId || !newStatusSelect) {
-      showAlert('error', 'Error', 'Status modal not properly initialized. Please refresh the page.')
+      showAlert("error", "Error", "Status modal not properly initialized. Please refresh the page.")
       return
     }
-    
+
     statusSubmissionId.value = submissionId
     statusSubmissionType.value = type
     statusCurrentStatusId.value = currentStatusId
-    
+
     if (currentStatusDisplay) {
-      currentStatusDisplay.value = STATUS_NAMES[currentStatus] || 'Unknown'
+      currentStatusDisplay.value = STATUS_NAMES[currentStatus] || "Unknown"
     }
-    
+
     // Populate dropdown with only valid next statuses
     const allowedStatuses = STATUS_FLOW[currentStatus] || []
     let optionsHTML = '<option value="">-- Select Status --</option>'
-    
-    allowedStatuses.forEach(statusId => {
+
+    allowedStatuses.forEach((statusId) => {
       optionsHTML += `<option value="${statusId}">${STATUS_NAMES[statusId]}</option>`
     })
-    
+
     newStatusSelect.innerHTML = optionsHTML
     newStatusSelect.value = ""
-    
+
     // Update alert message based on current status
-    const statusAlertDiv = document.querySelector('#statusModal .alert')
+    const statusAlertDiv = document.querySelector("#statusModal .alert")
     if (statusAlertDiv) {
       if (currentStatus === 1) {
-        statusAlertDiv.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Status can only progress from <strong>Pending</strong> to <strong>In Progress</strong>.'
-        statusAlertDiv.className = 'alert alert-info'
+        statusAlertDiv.innerHTML =
+          '<i class="bi bi-arrow-right-circle me-2"></i>Status can only progress from <strong>Pending</strong> to <strong>In Progress</strong>.'
+        statusAlertDiv.className = "alert alert-info"
       } else if (currentStatus === 2) {
-        statusAlertDiv.innerHTML = '<i class="bi bi-arrow-right-circle me-2"></i>Status can progress from <strong>In Progress</strong> to <strong>Resolved</strong> or <strong>Rejected</strong>.'
-        statusAlertDiv.className = 'alert alert-info'
+        statusAlertDiv.innerHTML =
+          '<i class="bi bi-arrow-right-circle me-2"></i>Status can progress from <strong>In Progress</strong> to <strong>Resolved</strong> or <strong>Rejected</strong>.'
+        statusAlertDiv.className = "alert alert-info"
       }
     }
-    
+
     if (statusModal) {
       statusModal.show()
     }
   } catch (error) {
-    console.error('Error in updateStatus:', error)
-    showAlert('error', 'Error', 'Error opening status modal: ' + error.message)
+    console.error("Error in updateStatus:", error)
+    showAlert("error", "Error", "Error opening status modal: " + error.message)
   }
 }
 
@@ -487,7 +527,7 @@ function submitResponse(event) {
   const message = document.getElementById("responseMessage")?.value
 
   if (!submissionId || !submissionType || !message) {
-    showAlert('error', 'Missing Information', 'Please fill in all required fields')
+    showAlert("error", "Missing Information", "Please fill in all required fields")
     return
   }
 
@@ -498,12 +538,12 @@ function submitResponse(event) {
   formData.append("studentId", studentId)
   formData.append("message", message)
 
-  showLoadingAlert('Sending Response...', 'Please wait while we send your response.')
+  showLoadingAlert("Sending Response...", "Please wait while we send your response.")
 
   fetch(getApiUrl(), {
     method: "POST",
     body: formData,
-    credentials: 'same-origin'
+    credentials: "same-origin",
   })
     .then((response) => {
       if (!response.ok) {
@@ -513,17 +553,17 @@ function submitResponse(event) {
     })
     .then((result) => {
       if (result.success) {
-        showAlert('success', 'Success!', result.message).then(() => {
+        showAlert("success", "Success!", result.message).then(() => {
           if (responseModal) responseModal.hide()
           location.reload()
         })
       } else {
-        showAlert('error', 'Error!', result.message || 'Failed to send response.')
+        showAlert("error", "Error!", result.message || "Failed to send response.")
       }
     })
     .catch((error) => {
       console.error("Error:", error)
-      showAlert('error', 'Connection Error!', 'Failed to connect to server: ' + error.message)
+      showAlert("error", "Connection Error!", "Failed to connect to server: " + error.message)
     })
 }
 
@@ -536,22 +576,26 @@ function confirmStatusUpdate(event) {
   const newStatusId = document.getElementById("newStatus")?.value
 
   if (!newStatusId) {
-    showAlert('warning', 'Warning!', 'Please select a status')
+    showAlert("warning", "Warning!", "Please select a status")
     return
   }
 
-  const currentStatus = parseInt(currentStatusId)
-  const newStatus = parseInt(newStatusId)
+  const currentStatus = Number.parseInt(currentStatusId)
+  const newStatus = Number.parseInt(newStatusId)
 
   // Validate status flow
   const allowedStatuses = STATUS_FLOW[currentStatus] || []
   if (!allowedStatuses.includes(newStatus)) {
-    showAlert('error', 'Invalid Status Change', `Cannot change status from ${STATUS_NAMES[currentStatus]} to ${STATUS_NAMES[newStatus]}. Please follow the proper status flow.`)
+    showAlert(
+      "error",
+      "Invalid Status Change",
+      `Cannot change status from ${STATUS_NAMES[currentStatus]} to ${STATUS_NAMES[newStatus]}. Please follow the proper status flow.`,
+    )
     return
   }
 
   if (currentStatus === newStatus) {
-    showAlert('info', 'No Change', 'The selected status is the same as the current status.')
+    showAlert("info", "No Change", "The selected status is the same as the current status.")
     return
   }
 
@@ -561,12 +605,12 @@ function confirmStatusUpdate(event) {
   formData.append("submissionType", submissionType)
   formData.append("statusId", newStatusId)
 
-  showLoadingAlert('Updating Status...', 'Please wait while we update the status.')
+  showLoadingAlert("Updating Status...", "Please wait while we update the status.")
 
   fetch(getApiUrl(), {
     method: "POST",
     body: formData,
-    credentials: 'same-origin'
+    credentials: "same-origin",
   })
     .then((response) => {
       if (!response.ok) {
@@ -576,18 +620,29 @@ function confirmStatusUpdate(event) {
     })
     .then((result) => {
       if (result.success) {
-        showAlert('success', 'Success!', result.message).then(() => {
+        showAlert("success", "Success!", result.message).then(() => {
           if (statusModal) statusModal.hide()
           location.reload()
         })
       } else {
-        showAlert('error', 'Error!', result.message || 'Failed to update status.')
+        showAlert("error", "Error!", result.message || "Failed to update status.")
       }
     })
     .catch((error) => {
       console.error("Error:", error)
-      showAlert('error', 'Connection Error!', 'Failed to connect to server: ' + error.message)
+      showAlert("error", "Connection Error!", "Failed to connect to server: " + error.message)
     })
+}
+
+function escapeHtml(text) {
+  const map = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }
+  return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
 // Helper function for alerts
@@ -597,7 +652,7 @@ function showAlert(icon, title, text) {
       icon: icon,
       title: title,
       text: text,
-      confirmButtonColor: "#c41e3a"
+      confirmButtonColor: "#c41e3a",
     })
   } else {
     alert(text || title)
@@ -614,7 +669,7 @@ function showLoadingAlert(title, text) {
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading()
-      }
+      },
     })
   }
 }

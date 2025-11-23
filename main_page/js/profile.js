@@ -1,8 +1,3 @@
-/**
- * Profile Page Main Script
- * Handles table initialization, filtering, and modal operations
- */
-
 const bootstrap = window.bootstrap;
 
 let $table;
@@ -42,7 +37,7 @@ let tableInitialized = false;
   }
 })();
 
-// Setup filter buttons with proper multi-filter logic
+// Setup filter buttons
 function setupFilterButtons() {
   document.querySelectorAll('.filter-btn').forEach((btn) => {
     btn.addEventListener('click', function() {
@@ -50,24 +45,19 @@ function setupFilterButtons() {
       const filterType = btn.dataset.filterType;
       
       if (filter === 'all') {
-        // Clear all filters
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTypeFilter = 'all';
         currentStatusFilter = 'all';
       } else if (filterType === 'type') {
-        // Toggle type filters
         document.querySelectorAll('.filter-btn[data-filter-type="type"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentTypeFilter = filter;
-        // Remove 'All' active state
         document.querySelector('.filter-btn[data-filter="all"]')?.classList.remove('active');
       } else if (filterType === 'status') {
-        // Toggle status filters
         document.querySelectorAll('.filter-btn[data-filter-type="status"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentStatusFilter = filter;
-        // Remove 'All' active state
         document.querySelector('.filter-btn[data-filter="all"]')?.classList.remove('active');
       }
       
@@ -86,12 +76,10 @@ function applyFilters() {
     const rowStatus = row.dataset.status;
     let shouldShow = true;
 
-    // Apply type filter
     if (currentTypeFilter !== 'all' && rowType !== currentTypeFilter) {
       shouldShow = false;
     }
 
-    // Apply status filter
     if (currentStatusFilter !== 'all' && rowStatus !== currentStatusFilter) {
       shouldShow = false;
     }
@@ -149,7 +137,6 @@ window.editSubmission = function(id, type) {
     })
     .then((html) => {
       modalBody.innerHTML = html;
-      // Call the initialization function from edit-submission.js
       if (typeof initializeEditForm === 'function') {
         initializeEditForm();
       }
@@ -226,3 +213,161 @@ window.deleteSubmission = function(id, type) {
     }
   });
 };
+
+// View responses - Opens as modal with backdrop
+window.viewResponses = function(id, type) {
+  // Create backdrop
+  const backdrop = document.createElement('div');
+  backdrop.className = 'response-viewer-backdrop';
+  backdrop.onclick = function(e) {
+    if (e.target === backdrop) {
+      closeResponseModal();
+    }
+  };
+
+  // Create container
+  const container = document.createElement('div');
+  container.className = 'response-viewer-container';
+  container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-success" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+  backdrop.appendChild(container);
+  document.body.appendChild(backdrop);
+  document.body.style.overflow = 'hidden';
+
+  // Add ESC key listener
+  document.addEventListener('keydown', handleResponseEscKey);
+
+  // FIXED: Changed from response_content.php to response.php
+  fetch(`response.php?id=${id}&type=${encodeURIComponent(type)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then(html => {
+      container.innerHTML = html;
+      // Initialize interactions if needed
+      if (typeof initializeResponseInteractions === 'function') {
+        initializeResponseInteractions(id, type);
+      }
+      // Update button state
+      updateResponseButtonAfterViewing(id, type);
+    })
+    .catch(err => {
+      container.innerHTML = `
+        <div class="alert alert-danger m-4" role="alert">
+          <i class="bi bi-exclamation-triangle"></i>
+          <strong>Error loading responses:</strong> ${err.message}
+        </div>`;
+    });
+};
+
+// Open feedback modal - Opens as modal with backdrop
+window.openFeedbackModal = function(id, type, title) {
+  // Create backdrop
+  const backdrop = document.createElement('div');
+  backdrop.className = 'feedback-viewer-backdrop';
+  backdrop.onclick = function(e) {
+    if (e.target === backdrop) {
+      closeFeedbackModal();
+    }
+  };
+
+  // Create container
+  const container = document.createElement('div');
+  container.className = 'feedback-viewer-container';
+  container.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div></div>';
+
+  backdrop.appendChild(container);
+  document.body.appendChild(backdrop);
+  document.body.style.overflow = 'hidden';
+
+  // Add ESC key listener
+  document.addEventListener('keydown', handleFeedbackEscKey);
+
+  // FIXED: Changed from feedback_content.php to feedback.php
+  fetch(`feedback.php?id=${id}&type=${encodeURIComponent(type)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then(html => {
+      container.innerHTML = html;
+      // Initialize star rating
+      if (typeof initializeFeedbackInteractions === 'function') {
+        initializeFeedbackInteractions(id, type);
+      }
+    })
+    .catch(err => {
+      container.innerHTML = `
+        <div class="alert alert-danger m-4" role="alert">
+          <i class="bi bi-exclamation-triangle"></i>
+          <strong>Error loading feedback form:</strong> ${err.message}
+        </div>`;
+    });
+};
+
+// Close response modal
+function closeResponseModal() {
+  const backdrop = document.querySelector('.response-viewer-backdrop');
+  if (backdrop) {
+    backdrop.classList.add('closing');
+    const container = backdrop.querySelector('.response-viewer-container');
+    if (container) {
+      container.classList.add('closing');
+    }
+    
+    setTimeout(() => {
+      backdrop.remove();
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleResponseEscKey);
+    }, 300);
+  }
+}
+
+// Close feedback modal
+function closeFeedbackModal() {
+  const backdrop = document.querySelector('.feedback-viewer-backdrop');
+  if (backdrop) {
+    backdrop.classList.add('closing');
+    const container = backdrop.querySelector('.feedback-viewer-container');
+    if (container) {
+      container.classList.add('closing');
+    }
+    
+    setTimeout(() => {
+      backdrop.remove();
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', handleFeedbackEscKey);
+    }, 300);
+  }
+}
+
+// ESC key handlers
+function handleResponseEscKey(e) {
+  if (e.key === 'Escape') {
+    closeResponseModal();
+  }
+}
+
+function handleFeedbackEscKey(e) {
+  if (e.key === 'Escape') {
+    closeFeedbackModal();
+  }
+}
+
+// Update button state after viewing response
+function updateResponseButtonAfterViewing(id, type) {
+  const allButtons = document.querySelectorAll('.btn-view-response');
+  allButtons.forEach(btn => {
+    const onclickAttr = btn.getAttribute('onclick');
+    if (onclickAttr && onclickAttr.includes(`viewResponses(${id}`) && onclickAttr.includes(`'${type}'`)) {
+      btn.classList.remove('unread');
+      btn.classList.add('read');
+      btn.style.animation = 'none';
+    }
+  });
+}
+
+// Make close functions globally available
+window.closeResponseModal = closeResponseModal;
+window.closeFeedbackModal = closeFeedbackModal;

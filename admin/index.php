@@ -5,10 +5,19 @@ require_once './process/AdminMiddleware.php';
 requireAdminAccess();
 
 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
-$allowed_pages = ['dashboard', 'responses', 'feedback', 'profile', 'settings', 'admin-management'];
+$allowed_pages = ['dashboard', 'responses', 'feedback', 'profile', 'settings', 'admin-management', 'activity_log'];
 
 if (!in_array($page, $allowed_pages)) {
     $page = 'dashboard';
+}
+
+// Check if trying to access Super Admin only pages
+if ($page === 'activity_log' || $page === 'profile') {
+    if (!isSuperAdmin()) {
+        // Redirect non-super admins to dashboard
+        header('Location: ?page=dashboard');
+        exit;
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -24,6 +33,12 @@ if (!in_array($page, $allowed_pages)) {
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/responses.css">
     <link rel="stylesheet" href="./css/profile.css">
+    
+    <?php if ($page === 'activity_log'): ?>
+        <link rel="stylesheet" href="./css/activity_logs.css">
+    <?php endif; ?>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -50,9 +65,12 @@ if (!in_array($page, $allowed_pages)) {
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="./js/main.js"></script>
     
+    <?php if ($page === 'dashboard'): ?>
+        <script src="./js/dashboard.js"></script>
+    <?php endif; ?>
 
     <?php if ($page === 'responses'): ?>
         <script src="./js/responses.js"></script>
@@ -60,6 +78,8 @@ if (!in_array($page, $allowed_pages)) {
         <script src="./js/profile.js"></script>
     <?php elseif ($page === 'settings'): ?>
         <script src="./js/settings.js"></script>
+    <?php elseif ($page === 'activity_log'): ?>
+        <script src="./js/activity_logs.js"></script>
     <?php endif; ?>
 </body>
 </html>

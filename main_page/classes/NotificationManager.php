@@ -1,7 +1,4 @@
 <?php
-/**
- * NotificationManager - Enhanced with pagination support
- */
 require_once __DIR__ . '/../../db.php';
 
 class NotificationManager {

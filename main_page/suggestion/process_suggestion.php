@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../classes/Suggestion.php';
+require_once __DIR__ . '/../classes/StudentActivityLog.php';
 
 try {
     $database = new Database();
@@ -30,6 +31,9 @@ if (empty($student_id)) {
     echo json_encode(['success' => false, 'message' => 'Student ID not found in session.']);
     exit();
 }
+
+// Initialize activity logger
+$activityLog = new StudentActivityLog($student_id);
 
 $category = isset($_POST['area']) ? trim($_POST['area']) : '';
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
@@ -62,6 +66,9 @@ if (!$valid['success']) {
 $result = $suggestion->create($data, $student_id);
 if ($result['success']) {
     $suggestion_id = $result['suggestion_id'];
+    
+    // Log suggestion creation
+    $activityLog->logSuggestionCreate($suggestion_id, $is_anonymous);
     
     header('Content-Type: application/json');
     echo json_encode([

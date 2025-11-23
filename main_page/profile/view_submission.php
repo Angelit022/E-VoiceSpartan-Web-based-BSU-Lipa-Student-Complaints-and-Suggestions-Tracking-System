@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
 
 require_once '../../db.php';
 require_once '../classes/UserProfile.php';
+require_once '../classes/StudentActivityLog.php';
 
 if (!isset($_GET['id']) || !isset($_GET['type'])) {
     http_response_code(400);
@@ -15,12 +16,16 @@ if (!isset($_GET['id']) || !isset($_GET['type'])) {
     exit();
 }
 
+$student_id = $_SESSION['user_id'];
 $database = new Database();
 $db = $database->getConnection();
-$userProfile = new UserProfile($db, $_SESSION['user_id']);
+$userProfile = new UserProfile($db, $student_id);
 
 $id = intval($_GET['id']);
 $type = $_GET['type'];
+
+// Initialize activity logger
+$activityLog = new StudentActivityLog($student_id);
 
 // Fetch submission details using class method
 $submission = $userProfile->getSubmissionDetails($type, $id);
@@ -30,6 +35,9 @@ if (!$submission) {
     echo '<div class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> Submission not found</div>';
     exit();
 }
+
+// Log submission view
+$activityLog->logSubmissionView($type, $id);
 
 // Get attachments if complaint
 $attachments = [];
@@ -42,7 +50,7 @@ if ($type === 'Complaint') {
     <div class="mb-3">
         <h6 class="text-muted mb-2"><i class="bi bi-info-circle"></i> Submission Type</h6>
         <p class="mb-0">
-            <span class="badge <?php echo $type === 'Complaint' ? 'bg-danger' : 'bg-warning'; ?>">
+            <span class="badge <?php echo $type === 'Complaint' ? 'bg-complaint' : 'bg-warning'; ?>">
                 <i class="bi <?php echo $type === 'Complaint' ? 'bi-exclamation-circle' : 'bi-lightbulb'; ?>"></i>
                 <?php echo htmlspecialchars($type); ?>
             </span>
@@ -132,3 +140,11 @@ if ($type === 'Complaint') {
         <p class="mb-0"><?php echo date('F d, Y @ h:i A', strtotime($submission['date_submitted'])); ?></p>
     </div>
 </div>
+
+<style>
+/* Orange badge for Complaint type in view modal */
+.badge.bg-complaint {
+    background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%) !important;
+    color: white !important;
+}
+</style>

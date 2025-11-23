@@ -3,6 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../../db.php';
+require_once __DIR__ . '/../../classes/ActivityLogger.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -69,6 +70,7 @@ if (trim($otp_record['otp_code']) !== trim($otp_input)) {
     exit;
 }
 
+// Set session variables
 if ($is_admin) {
     $_SESSION['admin_id'] = $auth_user;
     $_SESSION['admin_logged_in'] = true;
@@ -78,6 +80,11 @@ if ($is_admin) {
     $_SESSION['user_id'] = $auth_user;
     $_SESSION['logged_in'] = true;
 }
+
+// Log the successful login activity
+$activityLogger = new ActivityLogger();
+$user_type = $is_admin ? 'admin' : 'student';
+$activityLogger->logLogin($auth_user, $user_type, 'SMS OTP');
 
 // Delete used OTP
 $delete_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE id = ?");
@@ -94,13 +101,25 @@ if ($cleanup_stmt) {
     $cleanup_stmt->close();
 }
 
-$protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http";
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
-$basePath = dirname($_SERVER['SCRIPT_NAME'], 4);
 
-$redirect_url = $is_admin
-    ? "$protocol://$host$basePath/admin/index.php"
-    : "$protocol://$host$basePath/main_page/homepage.php";
+$script_path = $_SERVER['SCRIPT_NAME']; 
+$base_path = '';
+
+// Find the position of /signup_login
+$pos = strpos($script_path, '/signup_login');
+if ($pos !== false) {
+    $base_path = substr($script_path, 0, $pos);
+}
+
+if ($is_admin) {
+    $redirect_url = "$protocol://$host$base_path/admin/index.php";
+} else {
+    $redirect_url = "$protocol://$host$base_path/main_page/homepage.php";
+}
+
+error_log("[verify_sms_otp] Redirect URL: $redirect_url");
 
 echo json_encode([
     'status' => true,

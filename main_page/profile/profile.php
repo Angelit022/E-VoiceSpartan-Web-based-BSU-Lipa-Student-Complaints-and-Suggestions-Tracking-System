@@ -19,6 +19,11 @@ $stats = $userProfile->getStatistics();
 $fullName = ucfirst($userInfo['first_name']) . ' ' . ucfirst($userInfo['last_name']);
 $email = $userInfo['email'];
 $joinDate = isset($userInfo['date_joined']) ? $userInfo['date_joined'] : date('Y-m-d');
+
+// Check if we need to auto-open response viewer
+$autoOpenResponse = isset($_GET['view_response']) && $_GET['view_response'] == '1';
+$responseId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$responseType = isset($_GET['type']) ? $_GET['type'] : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -36,6 +41,8 @@ $joinDate = isset($userInfo['date_joined']) ? $userInfo['date_joined'] : date('Y
   <link rel="stylesheet" href="../css/profile.css">
   <link rel="stylesheet" href="../css/edit-submission.css">
   <link rel="stylesheet" href="../css/navbar.css">
+  <link rel="stylesheet" href="../css/response-viewer.css">
+  <link rel="stylesheet" href="../css/feedback-viewer.css">
 </head>
 <body>
   <?php include '../components/navbar.php'; ?>
@@ -199,50 +206,80 @@ $joinDate = isset($userInfo['date_joined']) ? $userInfo['date_joined'] : date('Y
                 </tr>
               </thead>
               <tbody id="submissions-body">
-                <?php foreach ($submissions as $sub): ?>
-                  <tr class="submission-row" data-type="<?php echo $sub['type']; ?>" data-status="<?php echo $sub['status']; ?>" data-id="<?php echo $sub['id']; ?>">
-                    <td>
-                      <span class="badge <?php echo $sub['type'] === 'Complaint' ? 'bg-danger' : 'bg-warning'; ?> bg-opacity-75">
-                        <i class="bi <?php echo $sub['type'] === 'Complaint' ? 'bi-exclamation-circle' : 'bi-lightbulb'; ?>"></i>
-                        <?php echo $sub['type']; ?>
-                      </span>
-                      <?php if (!empty($sub['is_anonymous']) && intval($sub['is_anonymous']) === 1): ?>
-                        <span class="badge bg-secondary ms-1" title="Submitted anonymously"><i class="bi bi-shield-lock"></i></span>
-                      <?php endif; ?>
-                    </td>
-                    <td>
-                      <div class="fw-bold"><?php echo htmlspecialchars($sub['title']); ?></div>
-                      <div class="text-muted small">#<?php echo str_pad($sub['id'], 5, '0', STR_PAD_LEFT); ?></div>
-                    </td>
-                    <td class="d-none d-sm-table-cell"><?php echo htmlspecialchars($sub['category'] ?? 'N/A'); ?></td>
-                    <td class="d-none d-md-table-cell">
-                      <?php if (!empty($sub['priority'])): ?>
-                        <span class="badge <?php echo UserProfile::getPriorityBadgeClass($sub['priority']); ?>"><?php echo $sub['priority']; ?></span>
-                      <?php else: ?>
-                        <span class="text-muted">-</span>
-                      <?php endif; ?>
-                    </td>
-                    <td class="d-none d-md-table-cell text-muted"><?php echo date('M d, Y', strtotime($sub['date_submitted'])); ?></td>
-                    <td class="d-none d-lg-table-cell">
-                      <span class="badge <?php echo UserProfile::getStatusBadgeClass($sub['status']); ?> bg-opacity-75"><?php echo $sub['status']; ?></span>
-                    </td>
-                    <td>
-                      <div class="btn-group btn-group-sm" role="group">
-                        <button class="btn btn-outline-primary" type="button" onclick="viewSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')">
-                          <i class="bi bi-eye"></i> <span class="d-none d-md-inline">View</span>
+              <?php foreach ($submissions as $sub): 
+                // Check if submission has responses
+                $hasResponses = false;
+                if (in_array($sub['status'], ['In Progress', 'Resolved', 'Rejected'])) {
+                  $submissionType = strtolower($sub['type']);
+                  $idColumn = $submissionType === 'complaint' ? 'complaint_id' : 'suggestion_id';
+                  
+                  $checkResponseQuery = "SELECT COUNT(*) as count FROM response WHERE $idColumn = ?";
+                  $checkStmt = $db->prepare($checkResponseQuery);
+                  $checkStmt->bind_param("i", $sub['id']);
+                  $checkStmt->execute();
+                  $responseResult = $checkStmt->get_result();
+                  $responseCount = $responseResult->fetch_assoc();
+                  $checkStmt->close();
+                  
+                  $hasResponses = $responseCount['count'] > 0;
+                }
+              ?>
+                <tr class="submission-row" data-type="<?php echo $sub['type']; ?>" data-status="<?php echo $sub['status']; ?>" data-id="<?php echo $sub['id']; ?>">
+                  <td>
+                    <span class="badge <?php echo $sub['type'] === 'Complaint' ? 'bg-opacity-75' : 'bg-warning'; ?>" style="<?php echo $sub['type'] === 'Complaint' ? 'background: linear-gradient(135deg, #ff8c42 0%, #ff6b35 100%) !important; color: white;' : ''; ?>">
+                      <i class="bi <?php echo $sub['type'] === 'Complaint' ? 'bi-exclamation-circle' : 'bi-lightbulb'; ?>"></i>
+                      <?php echo $sub['type']; ?>
+                    </span>
+                    <?php if (!empty($sub['is_anonymous']) && intval($sub['is_anonymous']) === 1): ?>
+                      <span class="badge bg-secondary" title="Submitted anonymously"><i class="bi bi-shield-lock"></i></span>
+                    <?php endif; ?>
+                  </td>
+                  <td>
+                    <div class="fw-bold"><?php echo htmlspecialchars($sub['title']); ?></div>
+                    <div class="text-muted small">#<?php echo str_pad($sub['id'], 5, '0', STR_PAD_LEFT); ?></div>
+                  </td>
+                  <td class="d-none d-sm-table-cell"><?php echo htmlspecialchars($sub['category'] ?? 'N/A'); ?></td>
+                  <td class="d-none d-md-table-cell">
+                    <?php if (!empty($sub['priority'])): ?>
+                      <span class="badge <?php echo UserProfile::getPriorityBadgeClass($sub['priority']); ?>"><?php echo $sub['priority']; ?></span>
+                    <?php else: ?>
+                      <span class="text-muted">-</span>
+                    <?php endif; ?>
+                  </td>
+                  <td class="d-none d-md-table-cell text-muted"><?php echo date('M d, Y', strtotime($sub['date_submitted'])); ?></td>
+                  <td class="d-none d-lg-table-cell">
+                    <span class="badge <?php echo UserProfile::getStatusBadgeClass($sub['status']); ?> bg-opacity-75"><?php echo $sub['status']; ?></span>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button class="btn btn-outline-primary" type="button" onclick="viewSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')">
+                        <i class="bi bi-eye"></i> 
+                      </button>
+                      <?php if ($sub['status'] === 'Pending'): ?>
+                        <button class="btn btn-outline-orange" type="button" onclick="editSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')">
+                          <i class="bi bi-pencil"></i> 
                         </button>
-                        <?php if ($sub['status'] === 'Pending'): ?>
-                          <button class="btn btn-outline-danger" type="button" onclick="editSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')">
-                            <i class="bi bi-pencil"></i> <span class="d-none d-md-inline">Edit</span>
-                          </button>
-                          <button class="btn btn-outline-secondary" type="button" onclick="deleteSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')" title="Delete submission">
-                            <i class="bi bi-trash"></i> <span class="d-none d-md-inline">Delete</span>
+                        <button class="btn btn-outline-secondary" type="button" onclick="deleteSubmission(<?php echo $sub['id']; ?>, '<?php echo $sub['type']; ?>')" title="Delete submission">
+                          <i class="bi bi-trash"></i> 
+                        </button>
+                      <?php elseif ($sub['status'] === 'Resolved'): ?>
+                        <?php if ($hasResponses): ?>
+                          <button class="btn-view-response btn btn-outline-success unread" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
+                            <i class="bi bi-envelope-open"></i>
                           </button>
                         <?php endif; ?>
-                      </div>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
+                        <button class="btn btn-outline-warning btn-feedback" type="button" onclick="openFeedbackModal(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>', '<?php echo htmlspecialchars(addslashes($sub['title'])); ?>')" title="Rate your experience">
+                          <i class="bi bi-star-fill"></i>
+                        </button>
+                      <?php elseif ($hasResponses): ?>
+                        <button class="btn-view-response btn btn-outline-success unread" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
+                          <i class="bi bi-envelope-open"></i>
+                        </button>
+                      <?php endif; ?>
+                    </div>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
               </tbody>
             </table>
           <?php else: ?>
@@ -287,9 +324,21 @@ $joinDate = isset($userInfo['date_joined']) ? $userInfo['date_joined'] : date('Y
   <script src="https://unpkg.com/bootstrap-table@1.22.3/dist/bootstrap-table.min.js"></script>
 
   <script src="../js/edit-submission.js"></script>
+  <script src="../js/response-viewer.js"></script>
+  <script src="../js/feedback-viewer.js"></script>
   <script src="../js/profile.js"></script>
   <script src="../js/navbar.js"></script>
   <script src="../js/global-theme.js"></script>
+
+  <?php if ($autoOpenResponse && $responseId > 0 && !empty($responseType)): ?>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(function() {
+        viewResponses(<?php echo $responseId; ?>, '<?php echo $responseType; ?>');
+      }, 500);
+    });
+  </script>
+  <?php endif; ?>
 
   <?php include '../components/footer.php'; ?>
 </body>

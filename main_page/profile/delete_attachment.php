@@ -12,6 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once '../../db.php';
+require_once '../classes/StudentActivityLog.php';
 
 // Get JSON input
 $input = json_decode(file_get_contents('php://input'), true);
@@ -31,8 +32,12 @@ if ($attachment_id <= 0) {
     exit();
 }
 
+$student_id = $_SESSION['user_id'];
 $database = new Database();
 $conn = $database->getConnection();
+
+// Initialize activity logger
+$activityLog = new StudentActivityLog($student_id);
 
 $query = "SELECT a.file_path, c.student_id, c.status_id
           FROM attachment a 
@@ -58,13 +63,11 @@ if (!$attachment) {
     exit();
 }
 
-
-if ($attachment['student_id'] != $_SESSION['user_id']) {
+if ($attachment['student_id'] != $student_id) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit();
 }
-
 
 if ($attachment['status_id'] != 1) {
     http_response_code(403);
@@ -72,14 +75,13 @@ if ($attachment['status_id'] != 1) {
     exit();
 }
 
-
 $file_path = "../../" . $attachment['file_path'];
+$filename = basename($attachment['file_path']);
 $fileDeleted = false;
 
 if (file_exists($file_path)) {
     $fileDeleted = @unlink($file_path);
 }
-
 
 $delete_query = "DELETE FROM attachment WHERE attachment_id = ?";
 $delete_stmt = $conn->prepare($delete_query);
@@ -94,6 +96,9 @@ $delete_stmt->bind_param("i", $attachment_id);
 
 if ($delete_stmt->execute()) {
     $delete_stmt->close();
+    
+    // Log attachment deletion
+    $activityLog->logAttachmentDelete($attachment_id, $filename);
     
     $message = 'Attachment deleted successfully';
     if (!$fileDeleted && file_exists($file_path)) {

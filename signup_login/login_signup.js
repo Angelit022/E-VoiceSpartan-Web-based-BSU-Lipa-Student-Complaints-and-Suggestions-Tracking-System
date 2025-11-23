@@ -4,6 +4,15 @@ const Swal = window.Swal
 let isSubmitting = false
 
 $(document).ready(() => {
+  // ===== CUSTOM VALIDATION METHOD FOR PHILIPPINE MOBILE NUMBERS =====
+  $.validator.addMethod("philippineMobile", function(value, element) {
+    // Remove any spaces or dashes
+    const cleanNumber = value.replace(/[\s-]/g, '')
+    
+    // Check if it's exactly 11 digits and starts with 09
+    return this.optional(element) || /^09\d{9}$/.test(cleanNumber)
+  }, "Please enter a valid Philippine mobile number (11 digits starting with 09)")
+
   // ===== SIGNUP VALIDATION =====
   if ($("#signupForm").length) {
     $("#signupForm").validate({
@@ -13,7 +22,10 @@ $(document).ready(() => {
         last_name: { required: true, minlength: 2 },
         email: { required: true, email: true },
         student_id: { required: true, minlength: 3 },
-        phone_number: { required: true, minlength: 10 },
+        phone_number: { 
+          required: true, 
+          philippineMobile: true 
+        },
         password: { required: true, minlength: 5 },
         confirm_password: {
           required: true,
@@ -26,7 +38,9 @@ $(document).ready(() => {
         last_name: { required: "Last name is required", minlength: "At least 2 characters" },
         email: { required: "Email is required", email: "Please enter a valid email address" },
         student_id: { required: "Student ID is required", minlength: "At least 3 characters" },
-        phone_number: { required: "Phone number is required", minlength: "At least 10 characters" },
+        phone_number: { 
+          required: "Phone number is required"
+        },
         password: { required: "Password is required", minlength: "At least 5 characters" },
         confirm_password: {
           required: "Please confirm your password",
@@ -63,6 +77,37 @@ $(document).ready(() => {
         })
         return false
       },
+    })
+
+    // ===== REAL-TIME PHONE NUMBER INPUT RESTRICTIONS =====
+    $('input[name="phone_number"]').on('keydown', function(e) {
+      // Allow: backspace, delete, tab, escape, enter, home, end, left arrow, right arrow
+      if ([8, 9, 27, 13, 46, 35, 36, 37, 39].indexOf(e.keyCode) !== -1 ||
+          // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+          (e.keyCode === 65 && e.ctrlKey === true) ||
+          (e.keyCode === 67 && e.ctrlKey === true) ||
+          (e.keyCode === 86 && e.ctrlKey === true) ||
+          (e.keyCode === 88 && e.ctrlKey === true)) {
+        return
+      }
+      
+      // Block if not a number (0-9) or numpad (96-105)
+      if ((e.keyCode < 48 || e.keyCode > 57) && (e.keyCode < 96 || e.keyCode > 105)) {
+        e.preventDefault()
+      }
+      
+      // Block if already 11 digits
+      if (this.value.length >= 11 && [8, 46, 37, 39].indexOf(e.keyCode) === -1) {
+        e.preventDefault()
+      }
+    })
+    
+    // Handle paste event to filter non-numeric
+    $('input[name="phone_number"]').on('paste', function(e) {
+      e.preventDefault()
+      const pastedText = (e.originalEvent.clipboardData || window.clipboardData).getData('text')
+      const numericOnly = pastedText.replace(/\D/g, '').substring(0, 11)
+      this.value = numericOnly
     })
   }
 

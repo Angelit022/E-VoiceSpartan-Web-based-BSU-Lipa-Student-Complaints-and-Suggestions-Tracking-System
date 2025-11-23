@@ -176,9 +176,6 @@ class UserProfile {
         return $stats;
     }
 
-    /**
-     * Get submission details for view
-     */
     public function getSubmissionDetails($type, $id) {
         if ($type === 'Complaint') {
             $query = "SELECT 
@@ -221,9 +218,6 @@ class UserProfile {
         return $data;
     }
 
-    /**
-     * Get submission for editing with ownership verification
-     */
     public function getSubmissionForEdit($type, $id) {
         $submission = $this->getSubmissionDetails($type, $id);
         
@@ -242,11 +236,7 @@ class UserProfile {
         return ['success' => true, 'data' => $submission];
     }
 
-    /**
-     * Update submission
-     */
     public function updateSubmission($type, $id, $data) {
-        // Verify ownership and status
         $check = $this->getSubmissionForEdit($type, $id);
         if (!$check['success']) {
             return $check;
@@ -289,11 +279,7 @@ class UserProfile {
         ];
     }
 
-    /**
-     * Delete submission (only if pending)
-     */
     public function deleteSubmission($type, $id) {
-        // Get submission with status
         if ($type === 'Complaint') {
             $query = "SELECT c.student_id, s.status_name 
                      FROM complaint c 
@@ -325,7 +311,6 @@ class UserProfile {
             return ['success' => false, 'message' => 'Only pending submissions can be deleted'];
         }
 
-        // Get attachment paths for complaints before deletion
         $filePaths = [];
         if ($type === 'Complaint') {
             $attach_query = "SELECT file_path FROM attachment WHERE complaint_id = ?";
@@ -340,7 +325,6 @@ class UserProfile {
             $attach_stmt->close();
         }
 
-        // Delete submission (CASCADE handles related records)
         if ($type === 'Complaint') {
             $delete_query = "DELETE FROM complaint WHERE complaint_id = ? AND student_id = ?";
         } else {
@@ -352,7 +336,6 @@ class UserProfile {
         $success = $delete_stmt->execute();
         $delete_stmt->close();
 
-        // Delete physical files
         if ($success && !empty($filePaths)) {
             foreach ($filePaths as $filePath) {
                 $fullPath = __DIR__ . '/../../' . $filePath;
@@ -368,9 +351,6 @@ class UserProfile {
         ];
     }
 
-    /**
-     * Get attachments for a complaint
-     */
     public function getAttachments($complaint_id) {
         $query = "SELECT attachment_id, file_path, file_type, uploaded_at 
                  FROM attachment 
@@ -391,6 +371,293 @@ class UserProfile {
         return $attachments;
     }
 
+    // ============ RESPONSE METHODS ============
+    
+    public function getResponses($type, $id) {
+        // Verify ownership
+        $verifyQuery = $type === 'complaint' 
+            ? "SELECT student_id FROM complaint WHERE complaint_id = ?"
+            : "SELECT student_id FROM suggestion WHERE suggestion_id = ?";
+        
+        $verifyStmt = $this->db->prepare($verifyQuery);
+        $verifyStmt->bind_param("i", $id);
+        $verifyStmt->execute();
+        $verifyResult = $verifyStmt->get_result();
+        $record = $verifyResult->fetch_assoc();
+        $verifyStmt->close();
+
+        if (!$record || $record['student_id'] !== $this->student_id) {
+            return ['success' => false, 'message' => 'Access denied'];
+        }
+
+        // Get responses
+        $idColumn = $type === 'complaint' ? 'complaint_id' : 'suggestion_id';
+        $query = "SELECT r.response_id, r.message, r.date_responded, a.name as admin_name, a.role as admin_role
+                  FROM response r
+                  INNER JOIN admin a ON r.admin_id = a.admin_id
+                  WHERE r.$idColumn = ?
+                  ORDER BY r.date_responded DESC";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $responses = [];
+        while ($row = $result->fetch_assoc()) {
+            $responses[] = $row;
+        }
+        $stmt->close();
+
+        return ['success' => true, 'responses' => $responses];
+    }
+
+    public function checkResponseStatus() {
+        // Ensure response_views table exists
+        $checkTableQuery = "CREATE TABLE IF NOT EXISTS response_views (
+            view_id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(64) NOT NULL,
+            complaint_id INT NULL,
+            suggestion_id INT NULL,
+            viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_view (student_id, complaint_id, suggestion_id),
+            KEY idx_viewed_at (viewed_at),
+            FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+        )";
+        $this->db->query($checkTableQuery);
+
+        // Get all complaints and suggestions with their response status AND viewed status
+        $query = "
+            SELECT 
+                'complaint' as type,
+                c.complaint_id as id,
+                CASE WHEN COUNT(r.response_id) > 0 THEN 1 ELSE 0 END as has_responses,
+                CASE WHEN rv.view_id IS NOT NULL THEN 1 ELSE 0 END as has_viewed
+            FROM complaint c
+            LEFT JOIN response r ON c.complaint_id = r.complaint_id
+            LEFT JOIN response_views rv ON c.complaint_id = rv.complaint_id AND rv.student_id = ?
+            WHERE c.student_id = ? AND c.status_id IN (2, 3, 4)
+            GROUP BY c.complaint_id
+            
+            UNION ALL
+            
+            SELECT 
+                'suggestion' as type,
+                s.suggestion_id as id,
+                CASE WHEN COUNT(r.response_id) > 0 THEN 1 ELSE 0 END as has_responses,
+                CASE WHEN rv.view_id IS NOT NULL THEN 1 ELSE 0 END as has_viewed
+            FROM suggestion s
+            LEFT JOIN response r ON s.suggestion_id = r.suggestion_id
+            LEFT JOIN response_views rv ON s.suggestion_id = rv.suggestion_id AND rv.student_id = ?
+            WHERE s.student_id = ? AND s.status_id IN (2, 3, 4)
+            GROUP BY s.suggestion_id
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ssss", $this->student_id, $this->student_id, $this->student_id, $this->student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $statuses = [];
+        while ($row = $result->fetch_assoc()) {
+            $key = $row['type'] . '_' . $row['id'];
+            $statuses[$key] = [
+                'has_responses' => (int)$row['has_responses'],
+                'has_viewed' => (int)$row['has_viewed']
+            ];
+        }
+
+        $stmt->close();
+        return ['success' => true, 'statuses' => $statuses];
+    }
+
+    public function markResponseViewed($type, $id) {
+        // Verify ownership
+        $table = $type === 'complaint' ? 'complaint' : 'suggestion';
+        $idColumn = $type === 'complaint' ? 'complaint_id' : 'suggestion_id';
+        
+        $verifyQuery = "SELECT student_id FROM $table WHERE $idColumn = ?";
+        $verifyStmt = $this->db->prepare($verifyQuery);
+        $verifyStmt->bind_param("i", $id);
+        $verifyStmt->execute();
+        $verifyResult = $verifyStmt->get_result();
+        $record = $verifyResult->fetch_assoc();
+        $verifyStmt->close();
+
+        if (!$record || $record['student_id'] !== $this->student_id) {
+            return ['success' => false, 'message' => 'Access denied'];
+        }
+
+        // Ensure table exists
+        $checkTableQuery = "CREATE TABLE IF NOT EXISTS response_views (
+            view_id INT AUTO_INCREMENT PRIMARY KEY,
+            student_id VARCHAR(64) NOT NULL,
+            complaint_id INT NULL,
+            suggestion_id INT NULL,
+            viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY unique_view (student_id, complaint_id, suggestion_id),
+            KEY idx_viewed_at (viewed_at),
+            FOREIGN KEY (student_id) REFERENCES student(student_id) ON DELETE CASCADE
+        )";
+        $this->db->query($checkTableQuery);
+
+        // Insert or update viewed status
+        if ($type === 'complaint') {
+            $insertQuery = "INSERT INTO response_views (student_id, complaint_id, viewed_at) 
+                           VALUES (?, ?, NOW()) 
+                           ON DUPLICATE KEY UPDATE viewed_at = NOW()";
+            $insertStmt = $this->db->prepare($insertQuery);
+            $insertStmt->bind_param("si", $this->student_id, $id);
+        } else {
+            $insertQuery = "INSERT INTO response_views (student_id, suggestion_id, viewed_at) 
+                           VALUES (?, ?, NOW()) 
+                           ON DUPLICATE KEY UPDATE viewed_at = NOW()";
+            $insertStmt = $this->db->prepare($insertQuery);
+            $insertStmt->bind_param("si", $this->student_id, $id);
+        }
+
+        $success = $insertStmt->execute();
+        $insertStmt->close();
+
+        return ['success' => $success];
+    }
+
+    // ============ FEEDBACK METHODS ============
+    
+    public function checkFeedbackStatus($type, $id) {
+        // Verify ownership
+        $table = $type === 'complaint' ? 'complaint' : 'suggestion';
+        $idColumn = $type === 'complaint' ? 'complaint_id' : 'suggestion_id';
+        
+        $verifyQuery = "SELECT student_id FROM $table WHERE $idColumn = ?";
+        $verifyStmt = $this->db->prepare($verifyQuery);
+        $verifyStmt->bind_param("i", $id);
+        $verifyStmt->execute();
+        $verifyResult = $verifyStmt->get_result();
+        $record = $verifyResult->fetch_assoc();
+        $verifyStmt->close();
+
+        if (!$record || $record['student_id'] !== $this->student_id) {
+            return ['success' => false, 'message' => 'Access denied'];
+        }
+
+        // Check if feedback already exists
+        $checkQuery = "SELECT rating FROM feedback WHERE $idColumn = ? AND student_id = ?";
+        $checkStmt = $this->db->prepare($checkQuery);
+        $checkStmt->bind_param("is", $id, $this->student_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $feedback = $checkResult->fetch_assoc();
+        $checkStmt->close();
+
+        if ($feedback) {
+            return [
+                'success' => true,
+                'has_feedback' => true,
+                'rating' => $feedback['rating']
+            ];
+        } else {
+            return [
+                'success' => true,
+                'has_feedback' => false
+            ];
+        }
+    }
+
+    public function checkAllFeedbackStatus() {
+        $query = "
+            SELECT 
+                'complaint' as type,
+                c.complaint_id as id,
+                CASE WHEN f.feedback_id IS NOT NULL THEN 1 ELSE 0 END as has_feedback
+            FROM complaint c
+            LEFT JOIN feedback f ON c.complaint_id = f.complaint_id AND f.student_id = ?
+            WHERE c.student_id = ? AND c.status_id = 3
+            
+            UNION ALL
+            
+            SELECT 
+                'suggestion' as type,
+                s.suggestion_id as id,
+                CASE WHEN f.feedback_id IS NOT NULL THEN 1 ELSE 0 END as has_feedback
+            FROM suggestion s
+            LEFT JOIN feedback f ON s.suggestion_id = f.suggestion_id AND f.student_id = ?
+            WHERE s.student_id = ? AND s.status_id = 3
+        ";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->bind_param("ssss", $this->student_id, $this->student_id, $this->student_id, $this->student_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $statuses = [];
+        while ($row = $result->fetch_assoc()) {
+            $key = $row['type'] . '_' . $row['id'];
+            $statuses[$key] = (int)$row['has_feedback'];
+        }
+
+        $stmt->close();
+        return ['success' => true, 'statuses' => $statuses];
+    }
+
+    public function submitFeedback($type, $id, $rating) {
+        // Verify ownership and status
+        $table = $type === 'complaint' ? 'complaint' : 'suggestion';
+        $idColumn = $type === 'complaint' ? 'complaint_id' : 'suggestion_id';
+        
+        $verifyQuery = "SELECT c.student_id, s.status_name 
+                        FROM $table c
+                        LEFT JOIN status s ON c.status_id = s.status_id
+                        WHERE c.$idColumn = ?";
+        $verifyStmt = $this->db->prepare($verifyQuery);
+        $verifyStmt->bind_param("i", $id);
+        $verifyStmt->execute();
+        $verifyResult = $verifyStmt->get_result();
+        $record = $verifyResult->fetch_assoc();
+        $verifyStmt->close();
+
+        if (!$record || $record['student_id'] !== $this->student_id) {
+            return ['success' => false, 'message' => 'Access denied'];
+        }
+
+        if ($record['status_name'] !== 'Resolved') {
+            return ['success' => false, 'message' => 'Can only provide feedback for resolved submissions'];
+        }
+
+        // Check if feedback already exists
+        $checkQuery = "SELECT feedback_id FROM feedback WHERE $idColumn = ? AND student_id = ?";
+        $checkStmt = $this->db->prepare($checkQuery);
+        $checkStmt->bind_param("is", $id, $this->student_id);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        $existing = $checkResult->fetch_assoc();
+        $checkStmt->close();
+
+        if ($existing) {
+            return ['success' => false, 'message' => 'You have already submitted feedback for this submission'];
+        }
+
+        // Insert feedback
+        if ($type === 'complaint') {
+            $insertQuery = "INSERT INTO feedback (complaint_id, student_id, rating, date_given) VALUES (?, ?, ?, NOW())";
+        } else {
+            $insertQuery = "INSERT INTO feedback (suggestion_id, student_id, rating, date_given) VALUES (?, ?, ?, NOW())";
+        }
+
+        $insertStmt = $this->db->prepare($insertQuery);
+        $insertStmt->bind_param("isi", $id, $this->student_id, $rating);
+        $success = $insertStmt->execute();
+        $insertStmt->close();
+
+        if ($success) {
+            return ['success' => true, 'message' => 'Feedback submitted successfully'];
+        } else {
+            return ['success' => false, 'message' => 'Failed to submit feedback. Please try again.'];
+        }
+    }
+
+    // ============ STATIC HELPER METHODS ============
+    
     public static function formatDate($dateString) {
         return date('M d, Y', strtotime($dateString));
     }

@@ -53,7 +53,7 @@ class ResponsesService {
                 st.status_name,
                 su.status_id,
                 'Suggestion', 
-                NULL, 
+                su.priority, 
                 su.date_submitted,
                 su.is_anonymous,
                 GROUP_CONCAT(
@@ -72,11 +72,6 @@ class ResponsesService {
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 
-    /**
-     * Parse attachments string into array
-     * @param string $attachmentsStr Concatenated attachments
-     * @return array Array of attachment objects
-     */
     public static function parseAttachments($attachmentsStr) {
         if (empty($attachmentsStr)) {
             return [];
@@ -109,6 +104,15 @@ class ResponsesService {
         }
     }
 
+    public static function getPriorityColor($priority) {
+        switch($priority) {
+            case 'High': return '#E57373';
+            case 'Medium': return '#FFEB3B';
+            case 'Low': return '#64B5F6';
+            default: return '#6c757d';
+        }
+    }
+
 
     public static function getStatusBadgeClass($status) {
         switch($status) {
@@ -117,6 +121,16 @@ class ResponsesService {
             case 'Resolved': return 'success';
             case 'Rejected': return 'danger';
             default: return 'secondary';
+        }
+    }
+
+    public static function getStatusBadgeColor($status) {
+        switch($status) {
+            case 'Pending': return '#FFEB3B';
+            case 'In Progress': return '#64B5F6';
+            case 'Resolved': return '#81C784';
+            case 'Rejected': return '#E57373';
+            default: return '#6c757d';
         }
     }
     

@@ -3,7 +3,7 @@ session_start();
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/AdminMiddleware.php';
 require_once __DIR__ . '/../classes/AdminService.php';
-require_once __DIR__ . '/../classes/AdminCrudHandler.php';
+require_once __DIR__ . '/../classes/AdminActivityLog.php';
 
 // Only Super Admin can access
 if (!isSuperAdmin()) {
@@ -12,35 +12,128 @@ if (!isSuperAdmin()) {
     exit;
 }
 
-$crudHandler = new AdminCrudHandler();
+// Get current admin info for logging
+$currentAdminId = $_SESSION['admin_id'] ?? null;
+$currentAdminName = $_SESSION['first_name'] ?? 'Admin';
+
+// Try to get more accurate admin info
+if ($currentAdminId) {
+    $database = new Database();
+    $db = $database->getConnection();
+    if ($db) {
+        $stmt = $db->prepare("SELECT name FROM admin WHERE admin_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $currentAdminId);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+            if ($result) {
+                $currentAdminName = $result['name'];
+            }
+            $stmt->close();
+        }
+    }
+}
+
+// Initialize activity logger
+$activityLog = new AdminActivityLog($currentAdminId, $currentAdminName);
+
+$adminService = new AdminService();
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
 $response = ['success' => false, 'message' => ''];
 
 switch ($action) {
     case 'create':
-        $response = $crudHandler->create([
+        $response = $adminService->create([
             'name' => trim($_POST['name'] ?? ''),
             'email' => trim($_POST['email'] ?? ''),
             'phone' => trim($_POST['phone'] ?? ''),
             'password' => trim($_POST['password'] ?? ''),
             'role' => trim($_POST['role'] ?? 'ssc_admin')
         ]);
+        
+        // Log the activity if successful
+        if ($response['success'] && isset($response['admin_id'])) {
+            $activityLog->logAdminCreate(
+                $response['admin_id'],
+                trim($_POST['name'] ?? ''),
+                trim($_POST['email'] ?? '')
+            );
+        }
         break;
 
     case 'update':
-        $response = $crudHandler->update([
-            'admin_id' => intval($_POST['admin_id'] ?? 0),
+        $targetAdminId = intval($_POST['admin_id'] ?? 0);
+        
+        // Get old admin data before update for comparison
+        $oldAdminData = $adminService->getAdminById($targetAdminId);
+        
+        $response = $adminService->update([
+            'admin_id' => $targetAdminId,
             'name' => trim($_POST['name'] ?? ''),
             'email' => trim($_POST['email'] ?? ''),
             'phone' => trim($_POST['phone'] ?? ''),
-            'role' => trim($_POST['role'] ?? 'ssc_admin')
+            'role' => trim($_POST['role'] ?? 'ssc_admin'),
+            'is_active' => intval($_POST['is_active'] ?? 1)
         ]);
+        
+        // Log the activity if successful
+        if ($response['success'] && $oldAdminData) {
+            $changes = [];
+            $newData = [
+                'name' => trim($_POST['name'] ?? ''),
+                'email' => trim($_POST['email'] ?? ''),
+                'phone' => trim($_POST['phone'] ?? ''),
+                'is_active' => intval($_POST['is_active'] ?? 1)
+            ];
+            
+            if ($oldAdminData['name'] !== $newData['name']) {
+                $changes[] = "Name: '{$oldAdminData['name']}' → '{$newData['name']}'";
+            }
+            if ($oldAdminData['email'] !== $newData['email']) {
+                $changes[] = "Email: '{$oldAdminData['email']}' → '{$newData['email']}'";
+            }
+            if ($oldAdminData['phone_number'] !== $newData['phone']) {
+                $changes[] = "Phone: '{$oldAdminData['phone_number']}' → '{$newData['phone']}'";
+            }
+            if ((int)$oldAdminData['is_active'] !== $newData['is_active']) {
+                $oldStatus = $oldAdminData['is_active'] ? 'Active' : 'Inactive';
+                $newStatus = $newData['is_active'] ? 'Active' : 'Inactive';
+                $changes[] = "Status: {$oldStatus} → {$newStatus}";
+            }
+            
+            $activityLog->logAdminUpdate(
+                $targetAdminId,
+                $oldAdminData['name'],
+                $changes
+            );
+        }
         break;
 
     case 'delete':
-        $response = $crudHandler->delete([
-            'admin_id' => intval($_POST['admin_id'] ?? 0)
+        $targetAdminId = intval($_POST['admin_id'] ?? 0);
+        
+        // Get admin data before deletion for logging
+        $targetAdminData = $adminService->getAdminById($targetAdminId);
+        
+        $response = $adminService->delete([
+            'admin_id' => $targetAdminId
         ]);
+        
+        // Log the activity if successful
+        if ($response['success'] && $targetAdminData) {
+            // Check if it was actual deletion or deactivation
+            if (strpos($response['message'], 'deactivated') !== false) {
+                $activityLog->logAdminDeactivate(
+                    $targetAdminId,
+                    $targetAdminData['name']
+                );
+            } else {
+                $activityLog->logAdminDelete(
+                    $targetAdminId,
+                    $targetAdminData['name']
+                );
+            }
+        }
         break;
 
     default:

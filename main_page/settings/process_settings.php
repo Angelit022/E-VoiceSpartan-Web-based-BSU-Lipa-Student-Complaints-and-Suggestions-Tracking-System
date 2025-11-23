@@ -10,6 +10,7 @@ require_once '../../db.php';
 require_once '../classes/SettingsManager.php';
 require_once '../classes/ValidationManager.php';
 require_once '../classes/NotificationManager.php';
+require_once '../classes/StudentActivityLog.php';
 
 header('Content-Type: application/json');
 
@@ -29,6 +30,9 @@ try {
     if (empty($studentId)) {
         throw new Exception('Invalid session - student ID is empty');
     }
+    
+    // Initialize activity logger
+    $activityLog = new StudentActivityLog($studentId);
     
     switch ($action) {
         case 'update_account':
@@ -62,6 +66,9 @@ try {
             }
 
             if ($settingsManager->updateAccountInfo($firstName, $lastName, $middleInitial, $email, $phoneNumber)) {
+                // Log account update
+                $activityLog->logSettingsUpdate('account');
+                
                 $response['success'] = true;
                 $response['message'] = 'Account information updated successfully!';
             } else {
@@ -96,6 +103,9 @@ try {
             }
 
             if ($settingsManager->updatePassword($newPassword)) {
+                // Log password change
+                $activityLog->logSettingsUpdate('password');
+                
                 $response['success'] = true;
                 $response['message'] = 'Password updated successfully!';
             } else {
@@ -127,6 +137,9 @@ try {
 
             $notificationManager = new NotificationManager($studentId);
             if ($notificationManager->updatePreferences($viaEmail, $viaSms)) {
+                // Log notification preferences update
+                $activityLog->logSettingsUpdate('notifications');
+                
                 $response['success'] = true;
                 $response['message'] = 'Notification preferences updated successfully!';
             } else {
@@ -142,6 +155,9 @@ try {
             $theme = $validator->sanitizeInput($_POST['theme'] ?? 'system');
 
             if ($settingsManager->updatePreferences($language, $theme)) {
+                // Log preferences update
+                $activityLog->logSettingsUpdate('preferences');
+                
                 $response['success'] = true;
                 $response['message'] = 'Preferences updated successfully!';
             } else {

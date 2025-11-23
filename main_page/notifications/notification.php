@@ -25,7 +25,7 @@ $unreadCount = $notificationManager->getUnreadCount();
 function getNotificationAttributes($notif) {
     $type = $notif['type'];
     
-    // Determine related entity (complaint or suggestion)
+    // Determine related entity
     if (!empty($notif['complaint_id'])) {
         $related = 'complaint';
     } elseif (!empty($notif['suggestion_id'])) {
@@ -34,9 +34,20 @@ function getNotificationAttributes($notif) {
         $related = 'general';
     }
     
-    return "data-type=\"{$type}\" data-related=\"{$related}\"";
+    $attrs = "data-type=\"{$type}\" data-related=\"{$related}\"";
+    
+    // Add IDs for response tracking
+    if (!empty($notif['complaint_id'])) {
+        $attrs .= " data-complaint-id=\"{$notif['complaint_id']}\"";
+    }
+    if (!empty($notif['suggestion_id'])) {
+        $attrs .= " data-suggestion-id=\"{$notif['suggestion_id']}\"";
+    }
+    
+    return $attrs;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,14 +64,14 @@ function getNotificationAttributes($notif) {
     <link rel="stylesheet" href="../css/navbar.css">
     <link rel="stylesheet" href="../css/notification.css">
 </head>
-<body>
+<body class="notification-page">
     <?php include '../components/navbar.php'; ?>
 
     <div class="notifications-container">
         <div class="notifications-header">
             <div>
                 <h1>
-                    <i class="bi bi-bell-fill"></i>
+                    <i class="bi bi-bell-fill" style="color: rgba(239, 68, 68, 0.6);"></i>
                     Notifications
                     <?php if ($unreadCount > 0): ?>
                         <span class="badge-unread"><?= $unreadCount ?></span>
@@ -89,9 +100,11 @@ function getNotificationAttributes($notif) {
             <?php foreach ($notifications as $notif): ?>
                 <div class="notification-item <?= $notif['is_read'] ? '' : 'unread' ?>" <?= getNotificationAttributes($notif) ?>>
                     <?php if ($notif['type'] === 'response'): ?>
+                        <!-- Icon moved to bottom-right, visible only for unread -->
                         <div class="view-response-icon" 
                              onclick="viewResponse(<?= $notif['complaint_id'] ?? $notif['suggestion_id'] ?>, '<?= $notif['complaint_id'] ? 'complaint' : 'suggestion' ?>')" 
-                             title="View Response">
+                             title="<?= $notif['is_read'] ? 'View response' : 'New response - Click to view' ?>"
+                             style="<?= $notif['is_read'] ? '' : '' ?>">
                             <i class="bi bi-envelope-open"></i>
                         </div>
                     <?php endif; ?>
@@ -100,7 +113,6 @@ function getNotificationAttributes($notif) {
                         <div>
                             <span class="notification-type">
                                 <?php 
-                                // Display more descriptive type labels
                                 $typeLabel = $notif['type'];
                                 if ($notif['type'] === 'status_update') {
                                     $typeLabel = 'Status Update';

@@ -63,13 +63,15 @@ if (!isset($_SESSION['user_id'])) {
           <label for="category">Complaint Category *</label>
           <select id="category" name="category" required>
             <option value="">-- Select a category --</option>
-            <option value="Academic Services">Academic Services</option>
-            <option value="Facilities & Infrastructure">Facilities & Infrastructure</option>
-            <option value="Library">Library</option>
-            <option value="Student Services">Student Services</option>
-            <option value="Health & Safety">Health & Safety</option>
-            <option value="Administrative">Administrative</option>
-            <option value="Other">Other</option>
+            <option value="Academic Concerns">Academic Concerns</option>
+            <option value="Facilities and Campus Environment">Facilities and Campus Environment</option>
+            <option value="Administrative Services">Administrative Services</option>
+            <option value="Student Services and Welfare">Student Services and Welfare</option>
+            <option value="Technology and Online Systems">Technology and Online Systems</option>
+            <option value="Security and Discipline">Security and Discipline</option>
+            <option value="Campus Policies and Regulations">Campus Policies and Regulations</option>
+            <option value="Accessibility">Accessibility</option>
+            <option value="Others">Others</option>
           </select>
         </div>
       </div>

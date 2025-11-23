@@ -5,6 +5,19 @@ class Suggestion {
         'fuck', 'shit', 'bitch', 'asshole', 'idiot', 'stupid',
         'offensive', 'inappropriate', 'vulgar'
     ];
+    
+    // Valid suggestion categories
+    private $validCategories = [
+        'Academic Improvements',
+        'Facility Enhancements',
+        'Administrative Process Improvements',
+        'Student Support and Engagement',
+        'Technology and System Upgrades',
+        'Campus Safety and Security Improvements',
+        'Environmental and Sustainability Initiatives',
+        'Mobility Enhancements',
+        'Others'
+    ];
 
     public function __construct(mysqli $conn) {
         $this->conn = $conn;
@@ -16,6 +29,11 @@ class Suggestion {
             if (!isset($data[$field]) || trim($data[$field]) === '') {
                 return ['success' => false, 'message' => ucfirst($field) . " is required."];
             }
+        }
+        
+        // Validate category
+        if (!in_array($data['category'], $this->validCategories)) {
+            return ['success' => false, 'message' => "Invalid category selected."];
         }
 
         if (mb_strlen($data['title']) > 255) {
@@ -48,6 +66,11 @@ class Suggestion {
         $studentVal = $student_id !== null ? $student_id : '';
         if (empty($studentVal)) {
             return ['success' => false, 'message' => 'Student ID is required.'];
+        }
+        
+        // Validate category before inserting
+        if (!in_array($category, $this->validCategories)) {
+            return ['success' => false, 'message' => 'Invalid category.'];
         }
         
         // Get the default "Pending" status_id
@@ -104,6 +127,10 @@ class Suggestion {
             $text = preg_replace('/\b' . preg_quote($word, '/') . '\b/i', str_repeat('*', strlen($word)), $text);
         }
         return $text;
+    }
+    
+    public function getValidCategories(): array {
+        return $this->validCategories;
     }
 }
 ?>

@@ -52,9 +52,6 @@ $userPreferences = $settingsManager->getPreferences();
             <button class="settings-tab" onclick="switchTab('privacy')">
                 <i class="bi bi-shield-lock"></i> <span data-translate="privacy">Privacy</span>
             </button>
-            <button class="settings-tab" onclick="switchTab('preferences')">
-                <i class="bi bi-sliders"></i> <span data-translate="preferences">Preferences</span>
-            </button>
         </div>
 
         <div id="account" class="settings-panel active">
@@ -90,7 +87,7 @@ $userPreferences = $settingsManager->getPreferences();
                     <input type="tel" id="phoneNumber" name="phoneNumber" value="<?= htmlspecialchars($student['phone_number'] ?? '') ?>">
                 </div>
                 <button type="submit" class="btn-save">
-                    <i class="bi bi-check-circle"></i> <span data-translate="saveChanges">Save Changes</span>
+                    <i class="bi bi-check-circle"></i> <span data-translate="saveChanges">Update</span>
                 </button>
             </form>
         </div>
@@ -146,50 +143,7 @@ $userPreferences = $settingsManager->getPreferences();
             </form>
         </div>
 
-        <div id="preferences" class="settings-panel">
-            <div class="panel-header">
-                <h2><i class="bi bi-sliders"></i> <span data-translate="appPreferences">App Preferences</span></h2>
-                <p data-translate="customizeExperience">Customize your experience</p>
-            </div>
-            <div class="success-message" id="pref-success"></div>
-            <div class="error-message" id="pref-error"></div>
-            <form id="preferences-form" onsubmit="handlePreferencesSubmit(event)">
-                <div class="form-group">
-                    <label for="language" data-translate="language">Language</label>
-                    <select id="language" name="language">
-                        <option value="en" <?= $userPreferences['language'] === 'en' ? 'selected' : '' ?>>English</option>
-                        <option value="tl" <?= $userPreferences['language'] === 'tl' ? 'selected' : '' ?>>Filipino (Tagalog)</option>
-                        <option value="es" <?= $userPreferences['language'] === 'es' ? 'selected' : '' ?>>Español (Spanish)</option>
-                        <option value="fr" <?= $userPreferences['language'] === 'fr' ? 'selected' : '' ?>>Français (French)</option>
-                        <option value="de" <?= $userPreferences['language'] === 'de' ? 'selected' : '' ?>>Deutsch (German)</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="theme" data-translate="theme">Theme</label>
-                    <div class="theme-selector">
-                        <div class="theme-option" data-theme="light">
-                            <input type="radio" id="theme-light" name="theme" value="light" <?= $userPreferences['theme'] === 'light' ? 'checked' : '' ?>>
-                            <label for="theme-light">
-                                <i class="bi bi-sun-fill"></i>
-                                <span data-translate="lightMode">Light Mode</span>
-                            </label>
-                        </div>
-                        <div class="theme-option" data-theme="dark">
-                            <input type="radio" id="theme-dark" name="theme" value="dark" <?= $userPreferences['theme'] === 'dark' ? 'checked' : '' ?>>
-                            <label for="theme-dark">
-                                <i class="bi bi-moon-stars-fill"></i>
-                                <span data-translate="darkMode">Dark Mode</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn-save">
-                    <i class="bi bi-check-circle"></i> <span data-translate="savePreferences">Save Preferences</span>
-                </button>
-            </form>
-        </div>
+
     </div>
 
     <?php include '../components/footer.php'; ?>

@@ -1,15 +1,11 @@
 <?php
-/**
- * AdminMiddleware - Verify admin session and access control
- * Updated: Removed Staff role, SSC Admin has full response access
- */
-
-require_once __DIR__ .'/../../db.php';
+require_once __DIR__ . '/../../db.php';
 
 if (!isset($_SESSION)) {
     session_start();
 }
 
+// Check if session is set
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || !isset($_SESSION['admin_role'])) {
     header('Location: ../../signup_login/login.php?redirect=admin');
     exit;
@@ -21,18 +17,52 @@ $admin_name = $_SESSION['first_name'] ?? 'Admin';
 $admin_email = $_SESSION['authUser'] ?? null;
 $admin_type = $_SESSION['admin_type'] ?? null;
 
+// Check if admin is active (only for database admins, not super admin)
+if ($admin_type === 'database_admin' && $admin_id) {
+    $database = new Database();
+    $db = $database->getConnection();
+    
+    $stmt = $db->prepare("SELECT is_active FROM admin WHERE admin_id = ? LIMIT 1");
+    $stmt->bind_param("i", $admin_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $admin = $result->fetch_assoc();
+        $stmt->close();
+        
+        // If admin is inactive, logout and redirect
+        if ($admin['is_active'] != 1) {
+            session_destroy();
+            header('Location: ../../signup_login/login.php?message=' . urlencode('Your account has been deactivated. Please contact Super Admin.'));
+            exit;
+        }
+    } else {
+        // Admin not found in database
+        $stmt->close();
+        session_destroy();
+        header('Location: ../../signup_login/login.php?message=' . urlencode('Admin account not found.'));
+        exit;
+    }
+}
 
- // Check if user is any type of admin (Super Admin or SSC Admin)
+/**
+ * Check if user is any type of admin (Super Admin or SSC Admin)
+ */
 function isAdmin() {
     return isset($_SESSION['admin_role']) && in_array($_SESSION['admin_role'], ['super_admin', 'ssc_admin']);
 }
 
- //Check if user is Super Admin specifically
+/**
+ * Check if user is Super Admin specifically
+ */
 function isSuperAdmin() {
     return isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'super_admin' && isset($_SESSION['admin_type']) && $_SESSION['admin_type'] === 'super_admin';
 }
 
- //Check if user is SSC Admin
+/**
+ * Check if user is SSC Admin
+ */
 function isSSCAdmin() {
     return isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === 'ssc_admin';
 }

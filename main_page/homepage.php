@@ -13,6 +13,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
   <title>E-VoiceSpartan - Your Voice, Our Priority</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <link rel="stylesheet" href="css/global-theme.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/homepage.css">
@@ -111,7 +112,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
           </div>
           <div class="col-lg-6">
             <div class="placeholder-image">
-              <img src="/placeholder.svg?height=400&width=500" alt="Illustrative Image">
+              <img src="../images/bsu.jpg" alt="BSU" style="height: 400px; width: 700px;">
             </div>
           </div>
         </div>
@@ -163,6 +164,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
   <?php include 'components/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="js/navigation.js"></script>
   <script src="js/global-theme.js"></script>
   <script src="js/navbar.js"></script>

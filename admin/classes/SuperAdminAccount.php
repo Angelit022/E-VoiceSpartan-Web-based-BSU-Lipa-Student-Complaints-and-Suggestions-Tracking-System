@@ -16,7 +16,6 @@ class SuperAdminAccount {
             return false;
         }
 
-        // Return admin data (never expose password)
         return [
             'admin_id' => $this->admin_id,
             'name' => $this->name,

@@ -1,5 +1,4 @@
 <?php
-// Determine the current page and directory
 $current_page = basename($_SERVER['PHP_SELF']);
 $current_dir = basename(dirname($_SERVER['PHP_SELF']));
 
@@ -8,37 +7,21 @@ function get_nav_path($target_page) {
     $is_main_page = $current_dir === 'main_page' || $current_dir === 'components' || $current_dir === 'css' || $current_dir === 'js' || $current_dir === 'classes';
     
     if ($is_main_page) {
-        if ($target_page === 'homepage') {
-            return 'homepage.php';
-        } elseif ($target_page === 'complaint') {
-            return './complaint/complaint.php';
-        } elseif ($target_page === 'suggestion') {
-            return './suggestion/suggestion.php';
-        } elseif ($target_page === 'notification') {
-            return './notifications/notification.php';
-        } elseif ($target_page === 'profile') {
-            return './profile/profile.php';
-        } elseif ($target_page === 'settings') {
-            return './settings/settings.php';
-        } elseif ($target_page === 'logout') {
-            return './logout.php';
-        }
+        if ($target_page === 'homepage') return 'homepage.php';
+        if ($target_page === 'complaint') return './complaint/complaint.php';
+        if ($target_page === 'suggestion') return './suggestion/suggestion.php';
+        if ($target_page === 'notification') return './notifications/notification.php';
+        if ($target_page === 'profile') return './profile/profile.php';
+        if ($target_page === 'settings') return './settings/settings.php';
+        if ($target_page === 'logout') return './logout.php';
     } else {
-        if ($target_page === 'homepage') {
-            return '../homepage.php';
-        } elseif ($target_page === 'complaint') {
-            return '../complaint/complaint.php';
-        } elseif ($target_page === 'suggestion') {
-            return '../suggestion/suggestion.php';
-        } elseif ($target_page === 'notification') {
-            return '../notifications/notification.php';
-        } elseif ($target_page === 'profile') {
-            return '../profile/profile.php';
-        } elseif ($target_page === 'settings') {
-            return '../settings/settings.php';
-        } elseif ($target_page === 'logout') {
-            return '../logout.php';
-        }
+        if ($target_page === 'homepage') return '../homepage.php';
+        if ($target_page === 'complaint') return '../complaint/complaint.php';
+        if ($target_page === 'suggestion') return '../suggestion/suggestion.php';
+        if ($target_page === 'notification') return '../notifications/notification.php';
+        if ($target_page === 'profile') return '../profile/profile.php';
+        if ($target_page === 'settings') return '../settings/settings.php';
+        if ($target_page === 'logout') return '../logout.php';
     }
     return '#';
 }
@@ -46,15 +29,11 @@ function get_nav_path($target_page) {
 function is_active($page_name) {
     $current_page = basename($_SERVER['PHP_SELF']);
     
-    if ($page_name === 'homepage' && $current_page === 'homepage.php') {
-        return true;
-    } elseif ($page_name === 'complaint' && $current_page === 'complaint.php') {
-        return true;
-    } elseif ($page_name === 'suggestion' && $current_page === 'suggestion.php') {
-        return true;
-    } elseif ($page_name === 'notification' && $current_page === 'notification.php') {
-        return true;
-    }
+    if ($page_name === 'homepage' && $current_page === 'homepage.php') return true;
+    if ($page_name === 'complaint' && $current_page === 'complaint.php') return true;
+    if ($page_name === 'suggestion' && $current_page === 'suggestion.php') return true;
+    if ($page_name === 'notification' && $current_page === 'notification.php') return true;
+    
     return false;
 }
 ?>
@@ -128,7 +107,7 @@ function is_active($page_name) {
   <div class="right-menu-footer mt-auto pt-3 border-top">
     <p class="fw-semibold mb-2">Angelito Gonzales</p>
     <small class="text-muted">angelito.gonzales@gsuite.bsu.edu.ph</small>
-    <a href="<?php echo get_nav_path('logout'); ?>" class="logout-btn-right">
+    <a href="#" class="logout-btn-right" id="logoutBtnRight">
       <i class="bi bi-box-arrow-right"></i> Logout
     </a>
   </div>
@@ -166,12 +145,138 @@ function is_active($page_name) {
   </div>
 
   <div class="sidebar-footer mt-auto pt-3 border-top">
-    <p class="fw-semibold mb-2">Angelito Gonzales</p>
-    <small class="text-muted">angelito.gonzales@gsuite.bsu.edu.ph</small>
-    <a href="<?php echo get_nav_path('logout'); ?>" class="logout-btn-right">
+    <p class="fw-semibold mb-2">NAME OF STUDENT(SOON)</p>
+    <small class="text-muted">23-1234@gsuite.bsu.edu.ph</small>
+    <a href="#" class="logout-btn-right" id="logoutBtnSidebar">
       <i class="bi bi-box-arrow-right"></i> Logout
     </a>
   </div>
 </div>
 
 <div id="overlay"></div>
+
+<script>
+(function() {
+  function initNavbar() {
+    const sidebar = document.getElementById("sidebarMenu");
+    const overlay = document.getElementById("overlay");
+    const menuToggleBtn = document.getElementById("menuToggleBtn");
+    const closeBtn = document.querySelector(".close-btn");
+    const rightMenuBar = document.getElementById("rightMenuBar");
+    const rightOverlay = document.getElementById("rightOverlay");
+    const dotsMenuBtn = document.getElementById("dotsMenuBtn");
+    const closeRightBtn = document.querySelector(".close-btn-right");
+    const logoutBtnRight = document.getElementById("logoutBtnRight");
+    const logoutBtnSidebar = document.getElementById("logoutBtnSidebar");
+
+    if (menuToggleBtn && sidebar && overlay) {
+      menuToggleBtn.addEventListener("click", function() {
+        sidebar.classList.add("active");
+        overlay.classList.add("active");
+      });
+    }
+
+    if (closeBtn && sidebar && overlay) {
+      closeBtn.addEventListener("click", function() {
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+      });
+    }
+
+    if (overlay && sidebar) {
+      overlay.addEventListener("click", function() {
+        sidebar.classList.remove("active");
+        overlay.classList.remove("active");
+      });
+    }
+
+    document.querySelectorAll(".sidebar-item").forEach(function(item) {
+      item.addEventListener("click", function() {
+        if (sidebar && overlay) {
+          sidebar.classList.remove("active");
+          overlay.classList.remove("active");
+        }
+      });
+    });
+
+    if (dotsMenuBtn && rightMenuBar && rightOverlay) {
+      dotsMenuBtn.addEventListener("click", function() {
+        rightMenuBar.classList.add("active");
+        rightOverlay.classList.add("active");
+      });
+    }
+
+    if (closeRightBtn && rightMenuBar && rightOverlay) {
+      closeRightBtn.addEventListener("click", function() {
+        rightMenuBar.classList.remove("active");
+        rightOverlay.classList.remove("active");
+      });
+    }
+
+    if (rightOverlay && rightMenuBar) {
+      rightOverlay.addEventListener("click", function() {
+        rightMenuBar.classList.remove("active");
+        rightOverlay.classList.remove("active");
+      });
+    }
+
+    document.querySelectorAll(".right-menu-item").forEach(function(item) {
+      item.addEventListener("click", function() {
+        if (rightMenuBar && rightOverlay) {
+          rightMenuBar.classList.remove("active");
+          rightOverlay.classList.remove("active");
+        }
+      });
+    });
+
+    function handleLogout(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const currentPath = window.location.pathname;
+      const isSubdirectory = currentPath.includes('/complaint/') || 
+                             currentPath.includes('/suggestion/') || 
+                             currentPath.includes('/notifications/') ||
+                             currentPath.includes('/profile/') ||
+                             currentPath.includes('/settings/');
+      const logoutPath = isSubdirectory ? '../logout.php' : './logout.php';
+      
+      if (typeof Swal === 'undefined') {
+        if (confirm("Do you want to logout?")) {
+          window.location.href = logoutPath + '?confirmed=true';
+        }
+        return;
+      }
+      
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to logout?",
+        icon: 'warning',
+        showCancelButton: true,
+        cancelButtonColor: '#8b9093ff',
+        confirmButtonColor: '#d33',
+        cancelButtonText: 'Cancel',
+        confirmButtonText: 'Logout'
+      }).then(function(result) {
+        if (result.isConfirmed) {
+          window.location.href = logoutPath + '?confirmed=true';
+        }
+      });
+    }
+
+    if (logoutBtnRight) {
+      logoutBtnRight.addEventListener("click", handleLogout);
+    }
+
+    if (logoutBtnSidebar) {
+      logoutBtnSidebar.addEventListener("click", handleLogout);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNavbar);
+  } else {
+    initNavbar();
+  }
+})();
+</script>

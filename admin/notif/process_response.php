@@ -31,6 +31,7 @@ if (empty($action)) {
 try {
     require_once __DIR__ . '/../../db.php';
     require_once __DIR__ . '/../classes/ResponseNotificationHandler.php';
+    require_once __DIR__ . '/../classes/AdminActivityLog.php';
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'System error: ' . $e->getMessage()]);
     exit();
@@ -205,6 +206,19 @@ function handleSendResponse($db) {
         return ['success' => false, 'message' => 'Error saving response: ' . $e->getMessage()];
     }
     
+    // LOG ACTIVITY - Response sent
+    try {
+        $activityLog = new AdminActivityLog($adminId, $adminName);
+        if ($submissionType === 'Complaint') {
+            $activityLog->logComplaintResponse($submissionId, $studentId, $isAnonymous);
+        } else {
+            $activityLog->logSuggestionResponse($submissionId, $studentId, $isAnonymous);
+        }
+    } catch (Exception $e) {
+        // Log error but don't fail the operation
+        error_log("Failed to log response activity: " . $e->getMessage());
+    }
+    
     try {
         $handler = new ResponseNotificationHandler();
         $notifResult = $handler->notifyStudentOfResponse(
@@ -248,6 +262,27 @@ function handleUpdateStatus($db) {
     $table = ($submissionType === 'Complaint') ? 'complaint' : 'suggestion';
     $idColumn = ($submissionType === 'Complaint') ? 'complaint_id' : 'suggestion_id';
     
+    // Get admin information for logging
+    $adminId = $_SESSION['admin_id'] ?? null;
+    $adminName = $_SESSION['first_name'] ?? 'Administrator';
+    
+    if ($adminId) {
+        try {
+            $stmt = $db->prepare("SELECT name FROM admin WHERE admin_id = ?");
+            if ($stmt) {
+                $stmt->bind_param("i", $adminId);
+                $stmt->execute();
+                $result = $stmt->get_result()->fetch_assoc();
+                if ($result) {
+                    $adminName = $result['name'];
+                }
+                $stmt->close();
+            }
+        } catch (Exception $e) {
+            // Use default admin name if query fails
+        }
+    }
+    
     try {
         $stmt = $db->prepare("SELECT student_id, status_id FROM $table WHERE $idColumn = ?");
         if (!$stmt) {
@@ -268,8 +303,24 @@ function handleUpdateStatus($db) {
         }
         
         $studentId = $result['student_id'];
+        $oldStatusId = $result['status_id'];
     } catch (Exception $e) {
         return ['success' => false, 'message' => 'Error retrieving submission'];
+    }
+    
+    // Get old status name for logging
+    $oldStatusName = 'Unknown';
+    try {
+        $stmt = $db->prepare("SELECT status_name FROM status WHERE status_id = ?");
+        if ($stmt) {
+            $stmt->bind_param("i", $oldStatusId);
+            $stmt->execute();
+            $statusResult = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            $oldStatusName = $statusResult['status_name'] ?? 'Unknown';
+        }
+    } catch (Exception $e) {
+        // Use default if query fails
     }
     
     try {
@@ -301,11 +352,26 @@ function handleUpdateStatus($db) {
             $statusName = $statusResult['status_name'] ?? 'Unknown';
         }
     } catch (Exception $e) {
-   
+        // Use default if query fails
+    }
+    
+    // LOG ACTIVITY - Status updated
+    if ($adminId) {
+        try {
+            $activityLog = new AdminActivityLog($adminId, $adminName);
+            if ($submissionType === 'Complaint') {
+                $activityLog->logComplaintStatusUpdate($submissionId, $oldStatusName, $statusName);
+            } else {
+                $activityLog->logSuggestionStatusUpdate($submissionId, $oldStatusName, $statusName);
+            }
+        } catch (Exception $e) {
+            // Log error but don't fail the operation
+            error_log("Failed to log status update activity: " . $e->getMessage());
+        }
     }
     
     try {
-        $notificationMsg = "Your " . strtolower($submissionType) . " (ID: #$submissionId) status has been updated to: $statusName";
+        $notificationMsg = "Your " . strtolower($submissionType) . " (ID: # 000$submissionId) status has been updated to: $statusName";
         $complaintId = ($submissionType === 'Complaint') ? $submissionId : null;
         $suggestionId = ($submissionType === 'Suggestion') ? $submissionId : null;
         
@@ -320,7 +386,7 @@ function handleUpdateStatus($db) {
             $stmt->close();
         }
     } catch (Exception $e) {
-      
+        // Notification failed but status updated successfully
     }
     
     return [

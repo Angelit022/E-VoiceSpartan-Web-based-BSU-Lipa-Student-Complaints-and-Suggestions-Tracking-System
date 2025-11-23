@@ -29,6 +29,11 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
                 </li>
                 <?php if (isSuperAdmin()): ?>
                 <li class="nav-item">
+                    <a class="nav-link <?php echo $current_page === 'activity_log' ? 'active' : ''; ?>" href="?page=activity_log">
+                        <i class="bi bi-activity me-1"></i> Activity Logs
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link <?php echo $current_page === 'profile' ? 'active' : ''; ?>" href="?page=profile">
                         <i class="bi bi-people me-1"></i> Admin Management
                     </a>
@@ -36,16 +41,16 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
                 <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link <?php echo $current_page === 'settings' ? 'active' : ''; ?>" href="?page=settings">
-                        <i class="bi bi-gear me-1"></i> Settings
+                       <i class="bi bi-person-circle me-2"></i> Profile
                     </a>
                 </li>
             </ul>
         </div>
         
         <div class="d-none d-lg-flex justify-content-end align-items-center">
-            <a href="./logout.php" 
-               class="btn btn-outline-light btn-sm d-flex align-items-center"
-               onclick="return confirm('Are you sure you want to logout?')">
+            <a href="#" 
+               id="logoutBtnDesktop"
+               class="btn btn-outline-light btn-sm d-flex align-items-center">
                 <i class="bi bi-box-arrow-right me-2"></i> Logout
             </a>
         </div>
@@ -109,6 +114,12 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
             </li>
             <?php if (isSuperAdmin()): ?>
             <li class="nav-item mb-2">
+                <a class="nav-link text-white <?php echo $current_page === 'activity_log' ? 'active bg-danger rounded' : ''; ?>" 
+                   href="index.php?page=activity_log">
+                    <i class="bi bi-activity me-2"></i> Activity Logs
+                </a>
+            </li>
+            <li class="nav-item mb-2">
                 <a class="nav-link text-white <?php echo $current_page === 'profile' ? 'active bg-danger rounded' : ''; ?>" 
                    href="index.php?page=profile">
                     <i class="bi bi-people me-2"></i> Admin Management
@@ -118,15 +129,15 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
             <li class="nav-item mb-2">
                 <a class="nav-link text-white <?php echo $current_page === 'settings' ? 'active bg-danger rounded' : ''; ?>" 
                    href="index.php?page=settings">
-                    <i class="bi bi-gear me-2"></i> Settings
+                    <i class="bi bi-person-circle me-2"></i> Profile
                 </a>
             </li>
             
             <!-- Logout button in mobile menu -->
             <li class="nav-item mt-4 pt-3 border-top border-secondary">
                 <a class="nav-link text-danger fw-bold" 
-                   href="./logout.php" 
-                   onclick="return confirm('Are you sure you want to logout?')">
+                   href="#"
+                   id="logoutBtnMobile">
                     <i class="bi bi-box-arrow-right me-2"></i> Logout
                 </a>
             </li>
@@ -205,6 +216,20 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
     .offcanvas {
         width: 260px !important;
     }
+    #mobileMenu {
+        background: linear-gradient(to bottom, #e6e6e6, #cccccc, #b3b3b3) !important;
+        color: #ffffffff !important;
+    }
+
+    /* Optional: make inner text/icons darker */
+    #mobileMenu .nav-link {
+        color: #a70000ff !important;
+    }
+
+    #mobileMenu .nav-link.active {
+        background-color: rgba(247, 2, 2, 0.4) !important;
+        color: #fefefeff !important;
+    }
 }
 
 @media (max-width: 575.98px) {
@@ -244,6 +269,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileMenu.hide();
             });
         });
+    }
+    
+    function handleLogout(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to logout?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#96a5b4ff',
+            confirmButtonText: 'Logout',
+            cancelButtonText: 'Cancel',
+            allowOutsideClick: true,
+            allowEscapeKey: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = './logout.php?confirmed=true';
+            }
+        });
+    }
+    
+    // Add logout event listeners
+    const logoutBtnDesktop = document.getElementById('logoutBtnDesktop');
+    const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+    
+    if (logoutBtnDesktop) {
+        logoutBtnDesktop.addEventListener('click', handleLogout);
+    }
+    
+    if (logoutBtnMobile) {
+        logoutBtnMobile.addEventListener('click', handleLogout);
     }
 });
 </script>

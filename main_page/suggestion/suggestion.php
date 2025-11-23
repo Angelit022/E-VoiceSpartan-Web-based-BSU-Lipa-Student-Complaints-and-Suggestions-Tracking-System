@@ -58,16 +58,15 @@ if (!isset($_SESSION['user_id'])) {
         <div class="form-group">
           <label>Improvement Area *</label>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
-            <label class="area-option"><input type="radio" name="area" value="Academic Programs & Curriculum" required><span>Academic Programs & Curriculum</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Campus Facilities & Infrastructure" required><span>Campus Facilities & Infrastructure</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Student Services & Support" required><span>Student Services & Support</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Library & Learning Resources" required><span>Library & Learning Resources</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Technology & IT Services" required><span>Technology & IT Services</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Campus Safety & Security" required><span>Campus Safety & Security</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Student Life & Activities" required><span>Student Life & Activities</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Dining & Cafeteria Services" required><span>Dining & Cafeteria Services</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Transportation & Parking" required><span>Transportation & Parking</span></label>
-            <label class="area-option"><input type="radio" name="area" value="Other" required><span>Other</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Academic Improvements" required><span>Academic Improvements</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Facility Enhancements" required><span>Facility Enhancements</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Administrative Process Improvements" required><span>Administrative Process Improvements</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Student Support and Engagement" required><span>Student Support and Engagement</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Technology and System Upgrades" required><span>Technology and System Upgrades</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Campus Safety and Security Improvements" required><span>Campus Safety and Security Improvements</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Environmental and Sustainability Initiatives" required><span>Environmental and Sustainability Initiatives</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Mobility Enhancements" required><span>Mobility Enhancements</span></label>
+            <label class="area-option"><input type="radio" name="area" value="Others" required><span>Others</span></label>
           </div>
         </div>
       </div>

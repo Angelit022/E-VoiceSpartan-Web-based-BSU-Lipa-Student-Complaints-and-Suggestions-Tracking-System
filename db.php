@@ -7,10 +7,10 @@ class Database {
     private $connection;
 
 
-    // private $host = "sql306.infinityfree.com";
-    // private $username = "if0_40428738";
-    // private $password = "kNjuoL3qE6AO";
-    // private $database = "if0_40428738_e_voice_spartan";
+    // private $host = "sql102.infinityfree.com";
+    // private $username = "if0_40429336";
+    // private $password = "Scf7vjBZqHOHgOl";
+    // private $database = "if0_40429336_e_voice_spartan";
     // private $connection;
     public function getConnection() {
         if ($this->connection === null) {

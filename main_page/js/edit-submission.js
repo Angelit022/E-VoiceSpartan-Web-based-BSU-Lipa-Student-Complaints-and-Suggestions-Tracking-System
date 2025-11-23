@@ -1,11 +1,9 @@
 /**
- * Edit Submission Handler
- * Manages the edit submission modal, form validation, and file attachments
+ * Edit Submission Handler - Updated with "Update" button
  */
 
-let originalFormData = {}; // Store original form data for change detection
+let originalFormData = {};
 
-// Initialize edit form handlers
 function initializeEditForm() {
   setTimeout(function() {
     const fileInput = document.getElementById('new-attachment');
@@ -15,17 +13,14 @@ function initializeEditForm() {
     
     if (!fileInput || !addBtn || !attachmentsList || !editForm) return;
 
-    // Store original form data for change detection
     storeOriginalFormData();
 
-    // Add button click triggers file input
     addBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
       fileInput.click();
     });
 
-    // File input change handler
     fileInput.addEventListener('change', function(e) {
       if (!this.files || this.files.length === 0) return;
       
@@ -33,7 +28,6 @@ function initializeEditForm() {
       handleNewFile(file);
     });
 
-    // Event delegation for delete buttons
     attachmentsList.addEventListener('click', function(e) {
       let deleteBtn = null;
       if (e.target.classList.contains('delete-attachment-btn') || e.target.classList.contains('btn-remove-file')) {
@@ -60,7 +54,6 @@ function initializeEditForm() {
       }
     });
 
-    // Form submit handler
     editForm.addEventListener('submit', function(e) {
       e.preventDefault();
       const id = this.getAttribute('data-submission-id');
@@ -69,9 +62,7 @@ function initializeEditForm() {
       return false;
     });
 
-    // Handle new file selection
     function handleNewFile(file) {
-      // Check total attachments (existing + new)
       const existing = attachmentsList.querySelectorAll('.attachment-item[data-attachment-id]').length;
       const pending = attachmentsList.querySelectorAll('.attachment-item[data-new="true"]').length;
       const total = existing + pending;
@@ -87,7 +78,6 @@ function initializeEditForm() {
         return;
       }
       
-      // Validate file size (10MB max)
       const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
         Swal.fire({
@@ -100,7 +90,6 @@ function initializeEditForm() {
         return;
       }
       
-      // Validate file type
       const validExtensions = ['jpg', 'jpeg', 'png', 'mp4', 'pdf', 'doc', 'docx'];
       const ext = file.name.split('.').pop().toLowerCase();
       if (!validExtensions.includes(ext)) {
@@ -114,11 +103,9 @@ function initializeEditForm() {
         return;
       }
       
-      // Remove "no attachments" message if present
       const noMsg = document.getElementById('noAttachmentsMsg');
       if (noMsg) noMsg.remove();
       
-      // Determine icon based on file extension
       let icon = 'bi-file-earmark';
       if (['jpg', 'jpeg', 'png', 'gif'].includes(ext)) icon = 'bi-image';
       else if (ext === 'pdf') icon = 'bi-file-pdf';
@@ -127,7 +114,6 @@ function initializeEditForm() {
       
       const fileSize = (file.size / (1024 * 1024)).toFixed(2);
       
-      // Create preview element
       const preview = document.createElement('div');
       preview.className = 'attachment-item new-file-preview';
       preview.setAttribute('data-new', 'true');
@@ -145,7 +131,6 @@ function initializeEditForm() {
       updateButtonState();
     }
 
-    // Remove new file (not yet uploaded)
     function removeNewFile(item) {
       fileInput.value = '';
       
@@ -160,7 +145,6 @@ function initializeEditForm() {
       }, 300);
     }
 
-    // Delete existing file from server
     function deleteExistingFile(attachmentId, item) {
       Swal.fire({
         title: 'Delete Attachment?',
@@ -221,7 +205,6 @@ function initializeEditForm() {
       });
     }
 
-    // Update button state based on attachment count
     function updateButtonState() {
       const existing = attachmentsList.querySelectorAll('.attachment-item[data-attachment-id]').length;
       const pending = attachmentsList.querySelectorAll('.attachment-item[data-new="true"]').length;
@@ -231,7 +214,6 @@ function initializeEditForm() {
       addBtn.disabled = !canAdd;
     }
 
-    // Store original form data
     function storeOriginalFormData() {
       originalFormData = {
         title: document.getElementById('edit-title')?.value.trim() || '',
@@ -241,7 +223,6 @@ function initializeEditForm() {
       };
     }
 
-    // Check if form data has changed
     function hasFormChanged() {
       const currentData = {
         title: document.getElementById('edit-title')?.value.trim() || '',
@@ -259,14 +240,12 @@ function initializeEditForm() {
              currentData.priority !== originalFormData.priority;
     }
 
-    // Submit form
     function submitForm(id, type) {
       const title = document.getElementById('edit-title').value.trim();
       const description = document.getElementById('edit-description').value.trim();
       const category = document.getElementById('edit-category').value.trim();
       const priority = document.getElementById('edit-priority').value || 'Medium';
       
-      // Validation
       if (!title || !description) {
         Swal.fire({
           icon: 'error',
@@ -287,7 +266,6 @@ function initializeEditForm() {
         return;
       }
 
-      // Check if form has changed
       if (!hasFormChanged()) {
         Swal.fire({
           icon: 'info',
@@ -313,7 +291,7 @@ function initializeEditForm() {
       const submitBtn = editForm.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+      submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Updating...';
       
       fetch('process_edit.php', {
         method: 'POST',
@@ -351,7 +329,6 @@ function initializeEditForm() {
       });
     }
 
-    // Initial button state
     updateButtonState();
   }, 100);
 }

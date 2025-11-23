@@ -66,7 +66,7 @@ class ResponseNotificationHandler {
             // Log notification in database
             $notifMessage = "Admin $adminName has responded to your " . 
                 ($complaintId ? "complaint" : "suggestion") . 
-                " (ID: #" . ($complaintId ?? $suggestionId) . ")";
+                " (ID: # 000" . ($complaintId ?? $suggestionId) . ")";
             
             $this->logNotification($studentId, $notifMessage, 'response', $complaintId, $suggestionId);
             return $success;
@@ -97,7 +97,7 @@ class ResponseNotificationHandler {
                 <div class='header'><h2>New Response from E-VoiceSpartan</h2></div>
                 <div class='content'>
                     <p>Dear Student,</p>
-                    <p>We have received a response to your <strong>$type</strong> (ID: #$id) from our team member <strong>$adminName</strong>:</p>
+                    <p>We have received a response to your <strong>$type</strong> (ID: # 000$id) from our team member <strong>$adminName</strong>:</p>
                     <div class='response-box'>
                         <p><strong>Response:</strong></p>
                         <p>" . nl2br(htmlspecialchars($message)) . "</p>

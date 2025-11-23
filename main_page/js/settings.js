@@ -1,4 +1,4 @@
-// Store original form values
+
 let originalAccountData = {};
 let originalNotificationData = {};
 let originalPreferencesData = {};

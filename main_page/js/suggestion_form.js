@@ -327,7 +327,7 @@ class SuggestionForm {
 
     if (this.doneBtn) {
       this.doneBtn.onclick = () => {
-        window.location.href = "../homepage.php"
+        window.location.href = "../profile/profile.php"
       }
     }
 

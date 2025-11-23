@@ -14,7 +14,7 @@
     <div class="slant"></div>
     <div class="text">
       <h1>E-VoiceSpartan</h1>
-      <p class="lead">Your voice matters — share your thoughts and be heard!</p>
+      <p class="lead">Your voice matters – share your thoughts and be heard!</p>
       <p class="small">Leading Innovations, Transforming Lives, Building the Nation</p>
     </div>
   </header>
@@ -30,7 +30,15 @@
 
   <input type="email" name="email" placeholder="GSuite account" required autocomplete="email">
   <input type="text" name="student_id" placeholder="Student ID" required autocomplete="off">
-  <input type="tel" name="phone_number" placeholder="Contact Number" required autocomplete="tel">
+  <input 
+    type="tel" 
+    name="phone_number" 
+    placeholder="Contact Number (e.g., 09466161074)" 
+    required 
+    autocomplete="tel" 
+    inputmode="numeric" 
+    pattern="[0-9]*"
+    maxlength="11">
   <input type="password" name="password" placeholder="Password (minimum 5 characters)" required minlength="5" autocomplete="new-password">
   <input type="password" name="confirm_password" placeholder="Confirm Password" required autocomplete="new-password">
   

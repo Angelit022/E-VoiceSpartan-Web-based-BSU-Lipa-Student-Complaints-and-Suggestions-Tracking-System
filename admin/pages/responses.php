@@ -2,6 +2,8 @@
 require_once '../db.php';
 require_once __DIR__ . '/../classes/ResponsesService.php';
 
+// No activity logging for page views
+
 $responsesService = new ResponsesService();
 $submissions = $responsesService->getAllSubmissions();
 ?>
@@ -9,7 +11,7 @@ $submissions = $responsesService->getAllSubmissions();
 <div class="container-fluid">
     <div class="mb-4 d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="fw-bold"><i class="bi bi-chat-dots"></i> Manage Student Reports</h2>
+            <h2 class="fw-bold text-danger"><i class="bi bi-chat-dots"></i> Manage Student Reports</h2>
             <p class="text-muted">View and manage all student complaints and suggestions</p>
         </div>
         <span class="badge bg-danger fs-6"><?php echo count($submissions); ?> Total Submissions</span>
@@ -56,10 +58,10 @@ $submissions = $responsesService->getAllSubmissions();
             <div>
                 <label class="form-label mb-0 fw-semibold">Sort:</label>
                 <div class="btn-group btn-group-sm ms-2" role="group">
-                    <button type="button" class="btn btn-outline-secondary" onclick="sortTable('asc')" id="sortAsc">
+                    <button type="button" class="btn btn-outline-danger" onclick="sortTable('asc')" id="sortAsc">
                         <i class="bi bi-arrow-up"></i> Oldest First
                     </button>
-                    <button type="button" class="btn btn-outline-secondary active" onclick="sortTable('desc')" id="sortDesc">
+                    <button type="button" class="btn btn-outline-danger active" onclick="sortTable('desc')" id="sortDesc">
                         <i class="bi bi-arrow-down"></i> Newest First
                     </button>
                 </div>
@@ -77,10 +79,10 @@ $submissions = $responsesService->getAllSubmissions();
                 <table class="table table-hover mb-0" id="reportsTable">
                     <thead class="bg-light">
                         <tr>
-                            <th style="width: 80px;">ID</th>
+                            <th style="width: 130px;">Submission ID</th>
                             <th>Student</th>
                             <th>Title</th>
-                            <th style="width: 100px;">Category</th>
+                            <th style="width: 120px;">Category</th>
                             <th style="width: 80px;">Type</th>
                             <th style="width: 100px;">Priority</th>
                             <th style="width: 100px;">Status</th>
@@ -93,12 +95,10 @@ $submissions = $responsesService->getAllSubmissions();
                             <tr data-type="<?php echo htmlspecialchars($row['type']); ?>" 
                                 data-status="<?php echo htmlspecialchars($row['status_name']); ?>" 
                                 data-date="<?php echo strtotime($row['date_submitted']); ?>">
-                                <td><small class="text-muted fw-semibold">#<?php echo $row['id']; ?></small></td>
+                                <td><small class="text-muted fw-semibold">#<?php echo str_pad($row['id'], 5, '0', STR_PAD_LEFT); ?></small></td>
                                 <td>
                                     <?php if ($row['is_anonymous']): ?>
-                                        <strong><i class="bi bi-incognito me-1"></i> Anonymous</strong>
-                                        <br>
-                                        <small class="badge bg-info">Anonymous Submission</small>
+                                        <i class="bi bi-incognito me-1"></i> <strong>Anonymous</strong>
                                     <?php else: ?>
                                         <strong><?php echo htmlspecialchars($row['first_name'] . ' ' . $row['last_name']); ?></strong>
                                         <br>
@@ -106,15 +106,15 @@ $submissions = $responsesService->getAllSubmissions();
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars(substr($row['title'], 0, 50)); ?></td>
-                                <td><small><?php echo htmlspecialchars($row['category']); ?></small></td>
+                                <td><small><?php echo !empty($row['category']) ? htmlspecialchars($row['category']) : 'N/A'; ?></small></td>
                                 <td>
-                                    <span class="badge bg-<?php echo $row['type'] === 'Complaint' ? 'danger' : 'success'; ?>">
+                                    <span class="badge" style="background-color: <?php echo $row['type'] === 'Complaint' ? '#FF8C00' : '#0d6efd'; ?>;">
                                         <?php echo $row['type']; ?>
                                     </span>
                                 </td>
                                 <td>
                                     <?php if ($row['priority']): ?>
-                                        <span class="badge bg-<?php echo ResponsesService::getPriorityClass($row['priority']); ?>">
+                                        <span class="badge" style="background-color: <?php echo ResponsesService::getPriorityColor($row['priority']); ?>;">
                                             <?php echo $row['priority']; ?>
                                         </span>
                                     <?php else: ?>
@@ -122,7 +122,7 @@ $submissions = $responsesService->getAllSubmissions();
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <span class="badge bg-<?php echo ResponsesService::getStatusBadgeClass($row['status_name']); ?>">
+                                    <span class="badge" style="background-color: <?php echo ResponsesService::getStatusBadgeColor($row['status_name']); ?>;">
                                         <?php echo $row['status_name']; ?>
                                     </span>
                                 </td>
@@ -134,7 +134,7 @@ $submissions = $responsesService->getAllSubmissions();
                                                 title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button type="button" class="btn btn-outline-info" 
+                                        <button type="button" class="btn btn-outline-success" 
                                                 onclick='openResponseModal(<?php echo json_encode($row, JSON_HEX_APOS | JSON_HEX_QUOT); ?>)'
                                                 title="<?php echo $row['is_anonymous'] ? 'Send Response (Anonymous)' : 'Send Response'; ?>">
                                             <i class="bi bi-chat"></i>
@@ -154,10 +154,10 @@ $submissions = $responsesService->getAllSubmissions();
         </div>
         
         <!-- Pagination controls -->
-        <div class="card-footer bg-light d-flex justify-content-between align-items-center py-3">
-            <div>
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center py-3 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
                 <label class="form-label mb-0 fw-semibold">Rows per page:</label>
-                <select class="form-select form-select-sm d-inline-block w-auto ms-2" id="rowsPerPage" onchange="changePagination()">
+                <select class="form-select form-select-sm" style="width: 70px; padding-right: 2rem;" id="rowsPerPage" onchange="changePagination()">
                     <option value="10" selected>10</option>
                     <option value="25">25</option>
                     <option value="50">50</option>
@@ -174,9 +174,9 @@ $submissions = $responsesService->getAllSubmissions();
 <div class="modal fade" id="detailsModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header" style="background-color: #0d6efd; color: white;">
                 <h5 class="modal-title fw-bold"><i class="bi bi-file-text"></i> Submission Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row mb-3" id="detailStudentSection">
@@ -206,9 +206,6 @@ $submissions = $responsesService->getAllSubmissions();
                     <div id="detailAttachments" class="mt-2"></div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
         </div>
     </div>
 </div>
@@ -217,9 +214,9 @@ $submissions = $responsesService->getAllSubmissions();
 <div class="modal fade" id="responseModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header" style="background-color: #28a745; color: white;">
                 <h5 class="modal-title fw-bold"><i class="bi bi-reply"></i> Send Response</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form onsubmit="submitResponse(event)" id="responseForm">
                 <div class="modal-body">
@@ -252,7 +249,7 @@ $submissions = $responsesService->getAllSubmissions();
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">
+                    <button type="submit" class="btn btn-success">
                         <i class="bi bi-send"></i> Send Response
                     </button>
                 </div>
@@ -265,9 +262,9 @@ $submissions = $responsesService->getAllSubmissions();
 <div class="modal fade" id="statusModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-light">
+            <div class="modal-header" style="background-color: #ffc107; color: #000;">
                 <h5 class="modal-title fw-bold"><i class="bi bi-arrow-repeat"></i> Update Status</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form onsubmit="confirmStatusUpdate(event)" id="statusForm">
                 <div class="modal-body">
@@ -295,7 +292,7 @@ $submissions = $responsesService->getAllSubmissions();
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-check-circle"></i> Update Status
+                        <i class="bi bi-check-circle"></i> Update
                     </button>
                 </div>
             </form>

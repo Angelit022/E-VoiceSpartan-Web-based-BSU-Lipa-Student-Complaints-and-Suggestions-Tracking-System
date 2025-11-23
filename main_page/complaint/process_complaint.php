@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Enable error reporting for debugging (remove in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -15,6 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/../../db.php';
 require_once __DIR__ . '/../classes/Complaint.php';
 require_once __DIR__ . '/../classes/Attachment.php';
+require_once __DIR__ . '/../classes/StudentActivityLog.php';
 
 try {
     $database = new Database();
@@ -34,6 +34,9 @@ if (empty($student_id)) {
     echo json_encode(['success' => false, 'message' => 'Student ID not found in session.']);
     exit();
 }
+
+// Initialize activity logger
+$activityLog = new StudentActivityLog($student_id);
 
 $category = isset($_POST['category']) ? trim($_POST['category']) : '';
 $title = isset($_POST['title']) ? trim($_POST['title']) : '';
@@ -62,7 +65,6 @@ if (empty($priority)) {
     exit();
 }
 
-// Prepare data array
 $data = [
     'category' => $category,
     'title' => $title,
@@ -91,6 +93,9 @@ try {
     
     $complaint_id = $result['complaint_id'];
     
+    // Log complaint creation
+    $activityLog->logComplaintCreate($complaint_id, $is_anonymous);
+    
     // Handle file upload if present
     $fileUploaded = false;
     $fileMessage = '';
@@ -103,12 +108,14 @@ try {
             if ($uploadResult['success']) {
                 $fileUploaded = true;
                 $fileMessage = ' File uploaded successfully.';
+                
+                // Log attachment upload
+                $filename = basename($_FILES['attachment']['name']);
+                $activityLog->logAttachmentUpload($complaint_id, $filename);
             } else {
-                // File upload failed, but complaint was created
                 $fileMessage = ' Warning: ' . $uploadResult['message'];
             }
         } else {
-            // File upload error
             $fileMessage = ' Warning: File upload error code ' . $_FILES['attachment']['error'];
         }
     }

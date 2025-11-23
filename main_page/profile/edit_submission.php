@@ -38,6 +38,26 @@ $attachments = [];
 if ($type === 'Complaint') {
     $attachments = $userProfile->getAttachments($id);
 }
+
+// Get categories based on type from database
+$categories = [];
+if ($type === 'Complaint') {
+    // Get enum values for complaint category
+    $catQuery = "SHOW COLUMNS FROM complaint LIKE 'category'";
+    $catResult = $conn->query($catQuery);
+    if ($catResult && $catRow = $catResult->fetch_assoc()) {
+        preg_match("/^enum\(\'(.*)\'\)$/", $catRow['Type'], $matches);
+        $categories = explode("','", $matches[1]);
+    }
+} else {
+    // Get enum values for suggestion category
+    $catQuery = "SHOW COLUMNS FROM suggestion LIKE 'category'";
+    $catResult = $conn->query($catQuery);
+    if ($catResult && $catRow = $catResult->fetch_assoc()) {
+        preg_match("/^enum\(\'(.*)\'\)$/", $catRow['Type'], $matches);
+        $categories = explode("','", $matches[1]);
+    }
+}
 ?>
 
 <form id="editForm" data-submission-id="<?php echo $id; ?>" data-submission-type="<?php echo htmlspecialchars($type); ?>">
@@ -60,8 +80,15 @@ if ($type === 'Complaint') {
     </div>
 
     <div class="mb-3">
-        <label for="edit-category" class="form-label"><i class="bi bi-folder"></i> Category</label>
-        <input type="text" id="edit-category" name="category" class="form-control" value="<?php echo htmlspecialchars($submission['category'] ?? ''); ?>">
+        <label for="edit-category" class="form-label"><i class="bi bi-folder"></i> Category <span class="text-danger">*</span></label>
+        <select id="edit-category" name="category" class="form-select" required>
+            <option value="">Select a category</option>
+            <?php foreach ($categories as $cat): ?>
+                <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo ($submission['category'] ?? '') === $cat ? 'selected' : ''; ?>>
+                    <?php echo htmlspecialchars($cat); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="mb-3">
@@ -128,7 +155,7 @@ if ($type === 'Complaint') {
 
     <div class="d-flex gap-2 mt-4">
         <button type="submit" class="btn btn-danger flex-grow-1">
-            <i class="bi bi-check-circle"></i> Save Changes
+            <i class="bi bi-check-circle"></i> Update
         </button>
         <button type="button" class="btn btn-secondary flex-grow-1" data-bs-dismiss="modal">
             <i class="bi bi-x-circle"></i> Cancel

@@ -74,6 +74,14 @@
   font-weight: 600;
 }
 
+/* Remove Bootstrap focus highlight for navbar icons */
+.navbar .icon-btn:focus,
+.navbar .icon-btn:focus-visible,
+.navbar .icon-btn:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
 .icon-btn {
   background: none;
   border: none;

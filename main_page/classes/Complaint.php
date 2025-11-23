@@ -5,6 +5,19 @@ class Complaint {
         'fuck', 'shit', 'bitch', 'asshole', 'idiot', 'stupid',
         'offensive', 'inappropriate', 'vulgar'
     ];
+    
+    // Valid complaint categories
+    private $validCategories = [
+        'Academic Concerns',
+        'Facilities and Campus Environment',
+        'Administrative Services',
+        'Student Services and Welfare',
+        'Technology and Online Systems',
+        'Security and Discipline',
+        'Campus Policies and Regulations',
+        'Accessibility',
+        'Others'
+    ];
 
     public function __construct(mysqli $conn) {
         $this->conn = $conn;
@@ -17,6 +30,11 @@ class Complaint {
                 return ['success' => false, 'message' => ucfirst($field) . " is required."];
             }
         }
+        
+        // Validate category
+        if (!in_array($data['category'], $this->validCategories)) {
+            return ['success' => false, 'message' => "Invalid category selected."];
+        }
 
         if (mb_strlen($data['title']) > 255) {
             return ['success' => false, 'message' => "Title must be 255 characters or less."];
@@ -24,6 +42,11 @@ class Complaint {
 
         if (mb_strlen($data['description']) < 10) {
             return ['success' => false, 'message' => "Description must be at least 10 characters."];
+        }
+        
+        // Validate priority
+        if (!in_array($data['priority'], ['Low', 'Medium', 'High'])) {
+            return ['success' => false, 'message' => "Invalid priority level."];
         }
 
         if (empty($student_id)) {
@@ -63,6 +86,11 @@ class Complaint {
         $description = $this->filterBannedWords(trim($data['description']));
         $priority = trim($data['priority']);
         $is_anonymous = !empty($data['is_anonymous']) ? 1 : 0;
+        
+        // Validate category before inserting
+        if (!in_array($category, $this->validCategories)) {
+            return ['success' => false, 'message' => 'Invalid category.'];
+        }
         
         // Get Pending status
         $statusSql = "SELECT status_id FROM status WHERE status_name = 'Pending' LIMIT 1";
@@ -122,6 +150,10 @@ class Complaint {
             $text = preg_replace('/\b' . preg_quote($word, '/') . '\b/i', str_repeat('*', strlen($word)), $text);
         }
         return $text;
+    }
+    
+    public function getValidCategories(): array {
+        return $this->validCategories;
     }
 }
 ?>
