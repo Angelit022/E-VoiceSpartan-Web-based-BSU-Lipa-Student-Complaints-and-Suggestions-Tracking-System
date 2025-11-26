@@ -3,12 +3,23 @@ require_once __DIR__ . '/../../signup_login/classes/ActivityLogger.php';
 
 class AdminActivityLog extends ActivityLogger {
     private $admin_id;
+    private $admin_email;
     private $admin_name;
     
-    public function __construct($admin_id, $admin_name = 'Admin') {
+    public function __construct($admin_id, $admin_name = 'Admin', $admin_email = null) {
         parent::__construct();
         $this->admin_id = $admin_id;
         $this->admin_name = $admin_name;
+        // Use email for logging if available, otherwise fall back to ID
+        $this->admin_email = $admin_email ?? $_SESSION['authUser'] ?? $admin_id;
+    }
+
+    /**
+     * Override parent log method to use email instead of numeric ID
+     */
+    private function logAsAdmin($activity_type, $activity_description) {
+        // Use email for user_id to properly identify admins in activity logs
+        return $this->log($this->admin_email, 'admin', $activity_type, $activity_description);
     }
 
     /**
@@ -16,7 +27,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logAdminLogin($method = 'Gmail OTP') {
         $description = "Admin {$this->admin_name} logged in successfully via {$method}";
-        return $this->log($this->admin_id, 'admin', 'login', $description);
+        return $this->logAsAdmin('login', $description);
     }
 
     /**
@@ -24,7 +35,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logAdminLogout() {
         $description = "Admin {$this->admin_name} logged out";
-        return $this->log($this->admin_id, 'admin', 'logout', $description);
+        return $this->logAsAdmin('logout', $description);
     }
 
     /**
@@ -32,7 +43,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logActivityLogsExport($format = 'CSV') {
         $description = "Admin exported activity logs to {$format}";
-        return $this->log($this->admin_id, 'admin', 'other', $description);
+        return $this->logAsAdmin('other', $description);
     }
 
     /**
@@ -40,7 +51,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logComplaintStatusUpdate($complaint_id, $old_status, $new_status) {
         $description = "Admin updated complaint (ID: #000{$complaint_id}) status from '{$old_status}' to '{$new_status}'";
-        return $this->log($this->admin_id, 'admin', 'edit', $description);
+        return $this->logAsAdmin('edit', $description);
     }
 
     /**
@@ -48,7 +59,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logSuggestionStatusUpdate($suggestion_id, $old_status, $new_status) {
         $description = "Admin updated suggestion (ID: #000{$suggestion_id}) status from '{$old_status}' to '{$new_status}'";
-        return $this->log($this->admin_id, 'admin', 'edit', $description);
+        return $this->logAsAdmin('edit', $description);
     }
 
     /**
@@ -57,7 +68,7 @@ class AdminActivityLog extends ActivityLogger {
     public function logComplaintResponse($complaint_id, $student_id, $is_anonymous = false) {
         $recipient = $is_anonymous ? "anonymous student" : "student {$student_id}";
         $description = "Admin sent response to {$recipient} for complaint (ID: #000{$complaint_id})";
-        return $this->log($this->admin_id, 'admin', 'create', $description);
+        return $this->logAsAdmin('create', $description);
     }
 
     /**
@@ -66,7 +77,7 @@ class AdminActivityLog extends ActivityLogger {
     public function logSuggestionResponse($suggestion_id, $student_id, $is_anonymous = false) {
         $recipient = $is_anonymous ? "anonymous student" : "student {$student_id}";
         $description = "Admin sent response to {$recipient} for suggestion (ID: #000{$suggestion_id})";
-        return $this->log($this->admin_id, 'admin', 'create', $description);
+        return $this->logAsAdmin('create', $description);
     }
 
     /**
@@ -74,7 +85,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logAdminCreate($new_admin_id, $new_admin_name, $new_admin_email) {
         $description = "Admin created new admin account: {$new_admin_name} ({$new_admin_email}) (ID: #000{$new_admin_id})";
-        return $this->log($this->admin_id, 'admin', 'create', $description);
+        return $this->logAsAdmin('create', $description);
     }
 
     /**
@@ -83,7 +94,7 @@ class AdminActivityLog extends ActivityLogger {
     public function logAdminUpdate($target_admin_id, $target_admin_name, $changes = []) {
         $changeText = !empty($changes) ? " - Changes: " . implode(", ", $changes) : "";
         $description = "Admin updated admin account: {$target_admin_name} (ID: #000{$target_admin_id}){$changeText}";
-        return $this->log($this->admin_id, 'admin', 'edit', $description);
+        return $this->logAsAdmin('edit', $description);
     }
 
     /**
@@ -91,7 +102,7 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logAdminDelete($deleted_admin_id, $deleted_admin_name) {
         $description = "Admin deleted admin account: {$deleted_admin_name} (ID: #000{$deleted_admin_id})";
-        return $this->log($this->admin_id, 'admin', 'delete', $description);
+        return $this->logAsAdmin('delete', $description);
     }
 
     /**
@@ -99,7 +110,15 @@ class AdminActivityLog extends ActivityLogger {
      */
     public function logAdminDeactivate($target_admin_id, $target_admin_name) {
         $description = "Admin deactivated admin account: {$target_admin_name} (ID: #000{$target_admin_id})";
-        return $this->log($this->admin_id, 'admin', 'edit', $description);
+        return $this->logAsAdmin('edit', $description);
+    }
+
+    /**
+     * Log viewing pages
+     */
+    public function logPageView($page_name) {
+        $description = "Admin viewed {$page_name}";
+        return $this->logAsAdmin('view', $description);
     }
 
     /**
@@ -111,7 +130,7 @@ class AdminActivityLog extends ActivityLogger {
             $activity_type = 'other';
         }
         
-        return $this->log($this->admin_id, 'admin', $activity_type, $description);
+        return $this->logAsAdmin($activity_type, $description);
     }
 }
 ?>

@@ -1,5 +1,19 @@
 /* Dashboard Styles - Enhanced Design */
 
+/* ===== PAGE HEADER - RED COLOR ===== */
+.container-fluid h2 {
+  color: #dc3545 !important;
+  font-weight: 700;
+}
+
+.container-fluid h2 i {
+  color: #dc3545 !important;
+}
+
+.container-fluid .text-muted {
+  color: #6c757d !important;
+}
+
 /* Statistics Cards */
 .stat-card {
   position: relative;
@@ -374,21 +388,6 @@
 
 .dropdown-item:hover {
   background-color: #f8f9fa;
-}
-
-/* Page Header */
-.container-fluid h2 {
-  color: #212529;
-  font-weight: 700;
-}
-
-.container-fluid .text-muted {
-  color: #6c757d !important;
-}
-
-/* Activity Monitoring Card (Super Admin) */
-.card-body .d-flex {
-  min-height: auto;
 }
 
 /* Empty State */

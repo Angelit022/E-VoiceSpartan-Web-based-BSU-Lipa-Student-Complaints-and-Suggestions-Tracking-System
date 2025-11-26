@@ -93,7 +93,6 @@ class ActivityLogService {
         $stmt = $this->db->prepare($query);
         
         if (!$stmt) {
-            error_log('[ActivityLogService] Query prepare failed: ' . $this->db->error);
             return [];
         }
 
@@ -165,7 +164,6 @@ class ActivityLogService {
         $stmt = $this->db->prepare($query);
         
         if (!$stmt) {
-            error_log('[ActivityLogService] Recent logs prepare failed: ' . $this->db->error);
             return [];
         }
 
@@ -188,18 +186,12 @@ class ActivityLogService {
         $stmt = $this->db->prepare($query);
         
         if (!$stmt) {
-            error_log('[ActivityLogService] Clean logs prepare failed: ' . $this->db->error);
             return false;
         }
 
         $stmt->bind_param('i', $days);
         $result = $stmt->execute();
-        $affected_rows = $stmt->affected_rows;
         $stmt->close();
-
-        if ($result) {
-            error_log("[ActivityLogService] Cleaned $affected_rows old activity logs (older than $days days)");
-        }
 
         return $result;
     }

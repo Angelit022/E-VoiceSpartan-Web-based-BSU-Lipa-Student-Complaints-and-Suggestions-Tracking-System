@@ -237,7 +237,6 @@ window.viewResponses = function(id, type) {
   // Add ESC key listener
   document.addEventListener('keydown', handleResponseEscKey);
 
-  // FIXED: Changed from response_content.php to response.php
   fetch(`response.php?id=${id}&type=${encodeURIComponent(type)}`)
     .then(res => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -249,8 +248,6 @@ window.viewResponses = function(id, type) {
       if (typeof initializeResponseInteractions === 'function') {
         initializeResponseInteractions(id, type);
       }
-      // Update button state
-      updateResponseButtonAfterViewing(id, type);
     })
     .catch(err => {
       container.innerHTML = `
@@ -284,7 +281,6 @@ window.openFeedbackModal = function(id, type, title) {
   // Add ESC key listener
   document.addEventListener('keydown', handleFeedbackEscKey);
 
-  // FIXED: Changed from feedback_content.php to feedback.php
   fetch(`feedback.php?id=${id}&type=${encodeURIComponent(type)}`)
     .then(res => {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -353,19 +349,6 @@ function handleFeedbackEscKey(e) {
   if (e.key === 'Escape') {
     closeFeedbackModal();
   }
-}
-
-// Update button state after viewing response
-function updateResponseButtonAfterViewing(id, type) {
-  const allButtons = document.querySelectorAll('.btn-view-response');
-  allButtons.forEach(btn => {
-    const onclickAttr = btn.getAttribute('onclick');
-    if (onclickAttr && onclickAttr.includes(`viewResponses(${id}`) && onclickAttr.includes(`'${type}'`)) {
-      btn.classList.remove('unread');
-      btn.classList.add('read');
-      btn.style.animation = 'none';
-    }
-  });
 }
 
 // Make close functions globally available

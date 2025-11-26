@@ -62,7 +62,7 @@ function is_active($page_name) {
 
 <nav class="navbar navbar-expand-lg d-flex align-items-center justify-content-between px-4 py-2">
   <div class="navbar-brand d-flex align-items-center gap-2">
-    <img src="/E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System/images/LOGO.png" 
+    <img src="../images/LOGO.png" 
          alt="Logo" class="brand-logo">
     <span class="logo-text fw-semibold" style="color:#e63946">E-VoiceSpartan</span>
   </div>

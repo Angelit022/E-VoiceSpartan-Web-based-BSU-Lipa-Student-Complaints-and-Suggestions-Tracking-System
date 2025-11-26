@@ -136,7 +136,8 @@ function submitFeedback(id, type, rating) {
         confirmButtonText: 'Great!',
         allowOutsideClick: false
       }).then(() => {
-        updateFeedbackButtonState(id, type);
+        // Reload page to update button state
+        location.reload();
       });
     } else {
       Swal.fire({
@@ -158,58 +159,4 @@ function submitFeedback(id, type, rating) {
       confirmButtonText: 'OK'
     });
   });
-}
-
-function updateFeedbackButtonState(id, type) {
-  const buttons = document.querySelectorAll(`button[onclick*="openFeedbackModal(${id}, '${type}'"]`);
-  buttons.forEach(btn => {
-    btn.classList.remove('unread');
-    btn.classList.add('read');
-    const indicator = btn.querySelector('.feedback-indicator');
-    if (indicator) {
-      indicator.remove();
-    }
-    btn.style.animation = 'none';
-  });
-}
-
-// Check feedback status on page load
-document.addEventListener('DOMContentLoaded', function() {
-  checkAllFeedbackStatus();
-});
-
-function checkAllFeedbackStatus() {
-  fetch('process_quick_review.php?action=check_all_status')
-    .then(response => response.json())
-    .then(data => {
-      if (data.success && data.statuses) {
-        Object.keys(data.statuses).forEach(key => {
-          const [type, id] = key.split('_');
-          const hasFeedback = data.statuses[key];
-          
-          const buttons = document.querySelectorAll(`button[onclick*="openFeedbackModal(${id}, '${type}'"]`);
-          buttons.forEach(btn => {
-            if (!hasFeedback) {
-              btn.classList.add('unread');
-              btn.classList.remove('read');
-              
-              if (!btn.querySelector('.feedback-indicator')) {
-                const indicator = document.createElement('span');
-                indicator.className = 'feedback-indicator';
-                btn.appendChild(indicator);
-              }
-            } else {
-              btn.classList.add('read');
-              btn.classList.remove('unread');
-              
-              const indicator = btn.querySelector('.feedback-indicator');
-              if (indicator) {
-                indicator.remove();
-              }
-            }
-          });
-        });
-      }
-    })
-    .catch(error => console.error('Error checking feedback status:', error));
 }

@@ -47,7 +47,6 @@ function setupClearFilters() {
     });
 }
 
-// Only allow sorting for User Type and Activity Type columns
 function setupSorting() {
     const sortableHeaders = document.querySelectorAll('.sortable');
     sortableHeaders.forEach(header => {
@@ -133,7 +132,6 @@ function setupExport() {
 
 function exportToCSV() {
     if (typeof activityLogsData === 'undefined') {
-        console.error('Activity logs data not available');
         return;
     }
     let csv = 'Log ID,User ID,User Type,Activity Type,Description,IP Address,User Agent,Date & Time\n';
@@ -213,7 +211,6 @@ function setupAutoRefresh() {
     const autoRefresh = localStorage.getItem('activityLogsAutoRefresh');
     if (autoRefresh === 'true') {
         setInterval(() => {
-            console.log('Auto-refreshing activity logs...');
             location.reload();
         }, 30000);
     }
@@ -304,5 +301,3 @@ document.addEventListener('keydown', function(e) {
         document.getElementById('clearFilters')?.click();
     }
 });
-
-console.log('[Activity Logs] Page initialized');

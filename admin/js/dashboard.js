@@ -1,4 +1,4 @@
-// Dashboard Analytics Charts - Activity Log functions removed
+// Dashboard Analytics Charts
 
 // Color palettes
 const complaintColors = ["#b22222", "#8b0000", "#d32f2f", "#9e9e9e", "#757575", "#dc3545", "#6c757d", "#b0b0b0"];
@@ -7,23 +7,19 @@ const statusColors = ["#ffc107", "#0dcaf0", "#198754", "#dc3545"];
 
 // Initialize charts when DOM is ready
 document.addEventListener("DOMContentLoaded", () => {
-  // Check if phpData is available
   if (typeof phpData === 'undefined') {
-    console.error('phpData is not defined. Charts cannot be initialized.');
     return;
   }
   
   initializeTrendChart();
   initializeCategoryCharts();
   initializeStatusCharts();
-  // Activity log initialization removed - now in activity_logs.js
 });
 
 // Monthly Trend Chart
 function initializeTrendChart() {
   const trendCtx = document.getElementById("trendChart");
   if (!trendCtx) {
-    console.error('Trend chart canvas not found');
     return;
   }
 
@@ -33,9 +29,7 @@ function initializeTrendChart() {
     suggestions: phpData.suggestionTrend || [],
   };
 
-  // Validate data
   if (fullTrendData.months.length === 0) {
-    console.warn('No trend data available');
     return;
   }
 
@@ -152,7 +146,6 @@ function initializeCategoryCharts() {
     }, { labels: [], data: [] });
 
     if (filteredData.data.length === 0) {
-      console.warn('No complaint category data available');
       catCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No data available</p>';
       return;
     }
@@ -216,7 +209,6 @@ function initializeCategoryCharts() {
     }, { labels: [], data: [] });
 
     if (filteredData.data.length === 0) {
-      console.warn('No suggestion category data available');
       suggestionCatCtx.parentElement.innerHTML = '<p class="text-muted text-center py-4">No data available</p>';
       return;
     }
@@ -274,7 +266,6 @@ function initializeStatusCharts() {
     const data = phpData.complaintStatuses || [];
 
     if (data.length === 0) {
-      console.warn('No complaint status data available');
       return;
     }
 
@@ -331,7 +322,6 @@ function initializeStatusCharts() {
     const data = phpData.suggestionStatuses || [];
 
     if (data.length === 0) {
-      console.warn('No suggestion status data available');
       return;
     }
 
@@ -381,5 +371,3 @@ function initializeStatusCharts() {
     });
   }
 }
-
-console.log('[Dashboard] Charts initialized successfully');

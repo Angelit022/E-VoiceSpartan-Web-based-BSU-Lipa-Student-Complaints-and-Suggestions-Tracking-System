@@ -1,5 +1,19 @@
 /* Activity Logs Page Styles - Enhanced Design */
 
+/* ===== PAGE HEADER - RED COLOR ===== */
+.container-fluid h2 {
+  color: #dc3545 !important;
+  font-weight: 700;
+}
+
+.container-fluid h2 i {
+  color: #dc3545 !important;
+}
+
+.container-fluid .text-muted {
+  color: #6c757d !important;
+}
+
 /* Enhanced stat cards with vibrant gradients and improved visibility */
 .stat-card-total {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -587,16 +601,6 @@
 .loading {
   opacity: 0.6;
   pointer-events: none;
-}
-
-/* Page header styling */
-.container-fluid h2 {
-  color: #212529;
-  font-weight: 700;
-}
-
-.container-fluid .text-muted {
-  color: #6c757d !important;
 }
 
 /* ===== ACTIVITY LOG DETAILS MODAL ===== */

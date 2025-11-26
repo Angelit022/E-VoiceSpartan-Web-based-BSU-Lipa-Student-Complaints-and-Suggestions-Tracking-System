@@ -2,7 +2,7 @@
 /**
  * validate_contact.php - Validate if the requested email/phone matches user's registered info
  * This prevents unauthorized OTP requests
- * Updated: Removed Staff role references
+ * Updated: Added masking for security
  */
 session_start();
 require_once __DIR__ . '/../../db.php';
@@ -15,6 +15,69 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+/**
+ * Mask phone number for security (show first 2 and last 2 digits)
+ * Example: 09466161074 -> 09*******74
+ */
+function maskPhoneNumber($phone) {
+    $phone = preg_replace('/\D/', '', $phone); // Remove non-digits
+    if (strlen($phone) < 4) {
+        return str_repeat('*', strlen($phone));
+    }
+    $first = substr($phone, 0, 2);
+    $last = substr($phone, -2);
+    $middle = str_repeat('*', strlen($phone) - 4);
+    return $first . $middle . $last;
+}
+
+/**
+ * Mask email for security (show first 2 chars of username and domain)
+ * Example: john.doe@gmail.com -> jo*****@gm***.com
+ * Example: 23-36439@g.batstate-u.edu.ph -> 23*****@g.*******.edu.ph
+ */
+function maskEmail($email) {
+    $parts = explode('@', $email);
+    if (count($parts) !== 2) {
+        return str_repeat('*', strlen($email));
+    }
+    
+    $username = $parts[0];
+    $domain = $parts[1];
+    
+    // Mask username (show first 2 characters)
+    if (strlen($username) <= 2) {
+        $maskedUsername = $username;
+    } else {
+        $maskedUsername = substr($username, 0, 2) . str_repeat('*', min(5, strlen($username) - 2));
+    }
+    
+    // Mask domain (show first 2 characters before first dot and keep TLD)
+    $domainParts = explode('.', $domain);
+    if (count($domainParts) > 0) {
+        $firstPart = $domainParts[0];
+        if (strlen($firstPart) <= 2) {
+            $maskedDomain = $firstPart;
+        } else {
+            $maskedDomain = substr($firstPart, 0, 2) . str_repeat('*', min(3, strlen($firstPart) - 2));
+        }
+        
+        // Keep the rest of domain structure
+        for ($i = 1; $i < count($domainParts); $i++) {
+            if ($i == count($domainParts) - 1) {
+                // Keep TLD visible
+                $maskedDomain .= '.' . $domainParts[$i];
+            } else {
+                // Mask middle parts
+                $maskedDomain .= '.' . str_repeat('*', strlen($domainParts[$i]));
+            }
+        }
+    } else {
+        $maskedDomain = $domain;
+    }
+    
+    return $maskedUsername . '@' . $maskedDomain;
+}
+
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
 
 $contact_type = $input['contact_type'] ?? ''; // 'email' or 'phone'
@@ -22,10 +85,7 @@ $contact_value = trim($input['contact_value'] ?? '');
 $user_id = $_SESSION['authUser'] ?? '';
 $is_admin = $_SESSION['is_admin'] ?? false;
 
-error_log("[validate_contact] START - contact_type: $contact_type, user_id: $user_id, is_admin: $is_admin");
-
 if (empty($contact_type) || empty($contact_value) || empty($user_id)) {
-    error_log("[validate_contact] Missing fields - contact_type: $contact_type, contact_value: $contact_value, user_id: $user_id");
     echo json_encode(['status' => false, 'message' => 'Missing required fields']);
     exit;
 }
@@ -33,7 +93,6 @@ if (empty($contact_type) || empty($contact_value) || empty($user_id)) {
 $db = (new Database())->getConnection();
 
 if (!$db) {
-    error_log("[validate_contact] Database connection failed");
     echo json_encode(['status' => false, 'message' => 'Database error']);
     exit;
 }
@@ -41,7 +100,6 @@ if (!$db) {
 if ($is_admin) {
     // Admin validation - Only Super Admin and SSC Admin
     $admin_type = $_SESSION['admin_type'] ?? '';
-    error_log("[validate_contact] Admin validation - admin_type: $admin_type");
     
     if ($admin_type === 'super_admin') {
         // Super Admin must use their specific email/phone
@@ -49,7 +107,6 @@ if ($is_admin) {
         $contact_info = $adminAuth->getAdminContactInfo($user_id);
         
         if (!$contact_info) {
-            error_log("[validate_contact] Super admin not found for: $user_id");
             echo json_encode(['status' => false, 'message' => 'Admin not found']);
             exit;
         }
@@ -59,22 +116,20 @@ if ($is_admin) {
         
         if ($contact_type === 'email') {
             if (strtolower($contact_value) !== strtolower($contact_info['email'])) {
-                $error_msg = "As Super Admin, please use your registered email: {$contact_info['email']}";
-                error_log("[validate_contact] Super Admin email mismatch - input: $contact_value, registered: {$contact_info['email']}");
+                $maskedEmail = maskEmail($contact_info['email']);
+                $error_msg = "As Super Admin, please use your registered email: {$maskedEmail}";
             } else {
                 $valid = true;
-                error_log("[validate_contact] Super Admin email verified");
             }
         } else if ($contact_type === 'phone') {
             $normalized_input = preg_replace('/\D/', '', $contact_value);
             $normalized_registered = preg_replace('/\D/', '', $contact_info['phone']);
             
             if ($normalized_input !== $normalized_registered) {
-                $error_msg = "As Super Admin, please use your registered phone number: {$contact_info['phone']}";
-                error_log("[validate_contact] Super Admin phone mismatch - input: $normalized_input, registered: $normalized_registered");
+                $maskedPhone = maskPhoneNumber($contact_info['phone']);
+                $error_msg = "As Super Admin, please use your registered phone number: {$maskedPhone}";
             } else {
                 $valid = true;
-                error_log("[validate_contact] Super Admin phone verified");
             }
         }
         
@@ -91,7 +146,6 @@ if ($is_admin) {
             LIMIT 1
         ");
         if (!$stmt) {
-            error_log("[validate_contact] Database prepare failed: " . $db->error);
             echo json_encode(['status' => false, 'message' => 'Database error']);
             exit;
         }
@@ -101,7 +155,6 @@ if ($is_admin) {
         $result = $stmt->get_result();
         
         if ($result->num_rows === 0) {
-            error_log("[validate_contact] SSC Admin not found for: $user_id");
             echo json_encode(['status' => false, 'message' => 'Admin not found']);
             $stmt->close();
             exit;
@@ -115,22 +168,20 @@ if ($is_admin) {
         
         if ($contact_type === 'email') {
             if (strtolower($contact_value) !== strtolower($admin['email'])) {
-                $error_msg = "Please use your registered email: {$admin['email']}";
-                error_log("[validate_contact] SSC Admin email mismatch - input: $contact_value, registered: {$admin['email']}");
+                $maskedEmail = maskEmail($admin['email']);
+                $error_msg = "Please use your registered email: {$maskedEmail}";
             } else {
                 $valid = true;
-                error_log("[validate_contact] SSC Admin email verified");
             }
         } else if ($contact_type === 'phone') {
             $normalized_input = preg_replace('/\D/', '', $contact_value);
             $normalized_registered = preg_replace('/\D/', '', $admin['phone_number']);
             
             if ($normalized_input !== $normalized_registered) {
-                $error_msg = "Please use your registered phone number: {$admin['phone_number']}";
-                error_log("[validate_contact] SSC Admin phone mismatch - input: $normalized_input, registered: $normalized_registered");
+                $maskedPhone = maskPhoneNumber($admin['phone_number']);
+                $error_msg = "Please use your registered phone number: {$maskedPhone}";
             } else {
                 $valid = true;
-                error_log("[validate_contact] SSC Admin phone verified");
             }
         }
         
@@ -147,7 +198,6 @@ if ($is_admin) {
     ");
     
     if (!$stmt) {
-        error_log("[validate_contact] Database prepare failed: " . $db->error);
         echo json_encode(['status' => false, 'message' => 'Database error']);
         exit;
     }
@@ -157,7 +207,6 @@ if ($is_admin) {
     $result = $stmt->get_result();
     
     if ($result->num_rows === 0) {
-        error_log("[validate_contact] Student not found for: $user_id");
         echo json_encode(['status' => false, 'message' => 'Student not found']);
         $stmt->close();
         exit;
@@ -171,22 +220,20 @@ if ($is_admin) {
     
     if ($contact_type === 'email') {
         if (strtolower($contact_value) !== strtolower($student['email'])) {
-            $error_msg = "Please use your registered G-Suite account: {$student['email']}";
-            error_log("[validate_contact] Student email mismatch - input: $contact_value, registered: {$student['email']}");
+            $maskedEmail = maskEmail($student['email']);
+            $error_msg = "Please use your registered G-Suite account: {$maskedEmail}";
         } else {
             $valid = true;
-            error_log("[validate_contact] Student email verified");
         }
     } else if ($contact_type === 'phone') {
         $normalized_input = preg_replace('/\D/', '', $contact_value);
         $normalized_registered = preg_replace('/\D/', '', $student['phone_number']);
         
         if ($normalized_input !== $normalized_registered) {
-            $error_msg = "Please use your registered phone number: {$student['phone_number']}";
-            error_log("[validate_contact] Student phone mismatch - input: $normalized_input, registered: $normalized_registered");
+            $maskedPhone = maskPhoneNumber($student['phone_number']);
+            $error_msg = "Please use your registered phone number: {$maskedPhone}";
         } else {
             $valid = true;
-            error_log("[validate_contact] Student phone verified");
         }
     }
     

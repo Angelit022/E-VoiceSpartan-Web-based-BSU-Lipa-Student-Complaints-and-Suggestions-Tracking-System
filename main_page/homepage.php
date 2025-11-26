@@ -27,7 +27,7 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION[
       <div class="hero-background"></div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        <h1 class="hero-title" style="color: red;">Your Voice, Our Priority</h1>
+        <h1 class="hero-title" style="color: red; font-size: 8rem; font-weight: 1000;">Your Voice, Our Priority</h1>
         <p class="hero-description">
           E-VoiceSpartan is your platform to file complaints, share suggestions, and drive meaningful change in our campus.
         </p>

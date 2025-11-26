@@ -5,7 +5,7 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
 <nav class="navbar navbar-expand-lg navbar-dark bg-danger fixed-top shadow-sm">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold d-flex align-items-center" href="?page=dashboard">
-            <img src="../images/LOGO.png" alt="Logo" style="height: 35px; width: auto;" class="me-2">
+            <img src="../../images/LOGO.png" alt="Logo" style="height: 35px; width: auto;" class="me-2">
             <span class="d-none d-sm-inline">E-VoiceSpartan</span>
             <span class="d-inline d-sm-none">EVS</span>
         </a>

@@ -10,10 +10,10 @@ const Swal = window.Swal
 
 // Status flow validation mapping
 const STATUS_FLOW = {
-  1: [2], // Pending can only go to In Progress
-  2: [3, 4], // In Progress can go to Resolved or Rejected
-  3: [], // Resolved is final
-  4: [], // Rejected is final
+  1: [2],
+  2: [3, 4],
+  3: [],
+  4: [],
 }
 
 const STATUS_NAMES = {
@@ -35,6 +35,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function initializeModals() {
   try {
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove())
+    
     const detailsModalEl = document.getElementById("detailsModal")
     const responseModalEl = document.getElementById("responseModal")
     const statusModalEl = document.getElementById("statusModal")
@@ -43,22 +45,54 @@ function initializeModals() {
       detailsModal = new bootstrap.Modal(detailsModalEl, {
         backdrop: true,
         keyboard: true,
+        focus: true
+      })
+      
+      detailsModalEl.addEventListener('shown.bs.modal', function() {
+        detailsModalEl.focus()
+        const backdrop = document.querySelector('.modal-backdrop')
+        if (backdrop) {
+          backdrop.style.zIndex = '1040'
+        }
+        detailsModalEl.style.zIndex = '1050'
       })
     }
+    
     if (responseModalEl && bootstrap) {
       responseModal = new bootstrap.Modal(responseModalEl, {
         backdrop: true,
         keyboard: true,
+        focus: true
+      })
+      
+      responseModalEl.addEventListener('shown.bs.modal', function() {
+        responseModalEl.focus()
+        const backdrop = document.querySelector('.modal-backdrop')
+        if (backdrop) {
+          backdrop.style.zIndex = '1040'
+        }
+        responseModalEl.style.zIndex = '1050'
       })
     }
+    
     if (statusModalEl && bootstrap) {
       statusModal = new bootstrap.Modal(statusModalEl, {
         backdrop: true,
         keyboard: true,
+        focus: true
+      })
+      
+      statusModalEl.addEventListener('shown.bs.modal', function() {
+        statusModalEl.focus()
+        const backdrop = document.querySelector('.modal-backdrop')
+        if (backdrop) {
+          backdrop.style.zIndex = '1040'
+        }
+        statusModalEl.style.zIndex = '1050'
       })
     }
   } catch (error) {
-    console.error("Error initializing modals:", error)
+    showAlert("error", "Error", "Error initializing modals")
   }
 }
 
@@ -267,108 +301,193 @@ function parseAttachments(attachmentsStr) {
 }
 
 function getFileIcon(fileType) {
-  if (fileType.includes("image")) return "bi-file-image text-primary"
-  if (fileType.includes("pdf")) return "bi-file-pdf text-danger"
-  if (fileType.includes("word") || fileType.includes("document")) return "bi-file-word text-info"
-  if (fileType.includes("excel") || fileType.includes("spreadsheet")) return "bi-file-excel text-success"
-  return "bi-file-earmark text-secondary"
+  if (fileType.includes("image")) return "bi-file-image"
+  if (fileType.includes("pdf")) return "bi-file-pdf"
+  if (fileType.includes("word") || fileType.includes("document")) return "bi-file-word"
+  if (fileType.includes("excel") || fileType.includes("spreadsheet")) return "bi-file-excel"
+  return "bi-file-earmark"
+}
+
+function getStatusClass(statusName) {
+  const statusMap = {
+    'Pending': 'status-pending',
+    'In Progress': 'status-in-progress',
+    'Resolved': 'status-resolved',
+    'Rejected': 'status-rejected'
+  }
+  return statusMap[statusName] || ''
+}
+
+function getPriorityClass(priority) {
+  const priorityMap = {
+    'High': 'priority-high',
+    'Medium': 'priority-medium',
+    'Low': 'priority-low'
+  }
+  return priorityMap[priority] || ''
 }
 
 function viewDetails(submission) {
   try {
-    console.log("[v0] viewDetails called with submission:", submission)
-
-    // Validate submission object
     if (!submission) {
       showAlert("error", "Error", "Invalid submission data")
       return
     }
 
-    const studentSection = document.getElementById("detailStudentSection")
+    const isAnonymous = submission.is_anonymous == 1 || submission.is_anonymous === true || submission.is_anonymous === "1"
+    
+    const modalBody = document.querySelector('#detailsModal .modal-body')
+    if (!modalBody) {
+      showAlert("error", "Error", "Modal body not found")
+      return
+    }
 
-    const isAnonymous =
-      submission.is_anonymous == 1 || submission.is_anonymous === true || submission.is_anonymous === "1"
+    modalBody.innerHTML = ''
 
+    // Student Information Section
     if (isAnonymous) {
-      if (studentSection) {
-        studentSection.innerHTML = `
-          <div class="col-12">
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-2"></i>
-              This is an anonymous submission. Student information is not available.
+      modalBody.innerHTML += `
+        <div class="detail-section">
+          <div class="section-header">
+            <i class="bi bi-person-circle"></i>
+            <h6>Student Information</h6>
+          </div>
+          <div class="anonymous-badge">
+            <i class="bi bi-incognito"></i>
+            <span>Anonymous Submission</span>
+          </div>
+        </div>
+      `
+    } else {
+      const studentName = `${submission.first_name || ""} ${submission.last_name || ""}`.trim()
+      const email = submission.email || "N/A"
+      
+      modalBody.innerHTML += `
+        <div class="detail-section">
+          <div class="section-header">
+            <i class="bi bi-person-circle"></i>
+            <h6>Student Information</h6>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Student Name</span>
+            <div class="detail-value">${escapeHtml(studentName)}</div>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Email</span>
+            <div class="detail-value">${escapeHtml(email)}</div>
+          </div>
+        </div>
+      `
+    }
+
+    // Submission Details Section
+    const title = submission.title || 'N/A'
+    const category = submission.category || 'N/A'
+    const description = submission.description || 'No description provided'
+    
+    modalBody.innerHTML += `
+      <div class="detail-section">
+        <div class="section-header">
+          <i class="bi bi-file-text"></i>
+          <h6>Submission Details</h6>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Title</span>
+          <div class="detail-value">${escapeHtml(title)}</div>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Category</span>
+          <div class="detail-value">${escapeHtml(category)}</div>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Description</span>
+          <div class="detail-value long-text">${escapeHtml(description)}</div>
+        </div>
+      </div>
+    `
+
+    // Status and Priority Section
+    const statusName = submission.status_name || 'Unknown'
+    const priority = submission.priority || 'N/A'
+    
+    modalBody.innerHTML += `
+      <div class="detail-section">
+        <div class="section-header">
+          <i class="bi bi-info-circle"></i>
+          <h6>Status & Priority</h6>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="detail-item">
+              <span class="detail-label">Current Status</span>
+              <div class="detail-value">
+                <span class="status-badge-large ${getStatusClass(statusName)}">
+                  <i class="bi bi-circle-fill"></i>
+                  ${escapeHtml(statusName)}
+                </span>
+              </div>
             </div>
           </div>
-        `
-      }
-    } else {
-      if (studentSection) {
-        const studentName = `${submission.first_name || ""} ${submission.last_name || ""}`.trim()
-        const email = submission.email || "N/A"
-        studentSection.innerHTML = `
           <div class="col-md-6">
-            <strong>Student Name:</strong>
-            <p id="detailStudentName" class="mb-2">${escapeHtml(studentName)}</p>
+            <div class="detail-item">
+              <span class="detail-label">Priority Level</span>
+              <div class="detail-value">
+                <span class="priority-badge-large ${getPriorityClass(priority)}">
+                  <i class="bi bi-flag-fill"></i>
+                  ${escapeHtml(priority)}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="col-md-6">
-            <strong>Email:</strong>
-            <p id="detailEmail" class="mb-2">${escapeHtml(email)}</p>
-          </div>
-        `
-      }
-    }
-
-    const detailTitle = document.getElementById("detailTitle")
-    const detailCategory = document.getElementById("detailCategory")
-    const detailDescription = document.getElementById("detailDescription")
-
-    if (detailTitle) {
-      detailTitle.textContent = submission.title || "N/A"
-    }
-    if (detailCategory) {
-      detailCategory.textContent = submission.category || "N/A"
-    }
-    if (detailDescription) {
-      detailDescription.textContent = submission.description || "No description provided"
-    }
-
-    const attachments = parseAttachments(submission.attachments)
-    const attachmentsSection = document.getElementById("detailAttachmentsSection")
-    const attachmentsContainer = document.getElementById("detailAttachments")
-
-    if (attachments.length > 0 && attachmentsContainer) {
-      attachmentsContainer.innerHTML = attachments
-        .map(
-          (att) => `
-        <div class="d-flex align-items-center mb-2 p-2 border rounded">
-          <i class="bi ${getFileIcon(att.type)} fs-4 me-3"></i>
-          <div class="flex-grow-1">
-            <div class="fw-semibold">${escapeHtml(att.filename)}</div>
-            <small class="text-muted">${escapeHtml(att.type)}</small>
-          </div>
-          <a href="${escapeHtml(att.path)}" target="_blank" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-download"></i> Download
-          </a>
         </div>
-      `,
-        )
-        .join("")
-      if (attachmentsSection) attachmentsSection.style.display = "block"
-    } else {
-      if (attachmentsSection) attachmentsSection.style.display = "none"
+      </div>
+    `
+
+    // Attachments Section
+    const attachments = parseAttachments(submission.attachments)
+    if (attachments.length > 0) {
+      let attachmentsHTML = `
+        <div class="detail-section">
+          <div class="section-header">
+            <i class="bi bi-paperclip"></i>
+            <h6>Attachments (${attachments.length})</h6>
+          </div>
+          <div class="attachments-grid">
+      `
+      
+      attachments.forEach(att => {
+        attachmentsHTML += `
+          <div class="attachment-card">
+            <i class="bi ${getFileIcon(att.type)} attachment-icon"></i>
+            <div class="attachment-info">
+              <div class="attachment-name">${escapeHtml(att.filename)}</div>
+              <div class="attachment-type">${escapeHtml(att.type)}</div>
+            </div>
+            <a href="${escapeHtml(att.path)}" target="_blank" class="attachment-download">
+              <i class="bi bi-download"></i>
+            </a>
+          </div>
+        `
+      })
+      
+      attachmentsHTML += `
+          </div>
+        </div>
+      `
+      
+      modalBody.innerHTML += attachmentsHTML
     }
 
     if (detailsModal) {
       detailsModal.show()
     }
   } catch (error) {
-    console.error("[v0] Error in viewDetails:", error)
-    showAlert("error", "Error opening details: " + error.message)
+    showAlert("error", "Error", "Error opening details")
   }
 }
 
 function openResponseModal(submission) {
   try {
-    // Check status first
     if (submission.status_name !== "In Progress") {
       showAlert(
         "warning",
@@ -380,7 +499,6 @@ function openResponseModal(submission) {
 
     const isAnonymous = submission.is_anonymous == 1 || submission.is_anonymous === true
 
-    // Get all modal elements
     const responseSubmissionId = document.getElementById("responseSubmissionId")
     const responseSubmissionType = document.getElementById("responseSubmissionType")
     const responseStudentId = document.getElementById("responseStudentId")
@@ -391,18 +509,15 @@ function openResponseModal(submission) {
     const charCount = document.getElementById("charCount")
     const alertDiv = document.querySelector("#responseModal .alert")
 
-    // Validate critical elements exist
     if (!responseSubmissionId || !responseSubmissionType || !responseStudentId) {
       showAlert("error", "Error", "Modal not properly initialized. Please refresh the page.")
       return
     }
 
-    // Set hidden fields
     responseSubmissionId.value = submission.id
     responseSubmissionType.value = submission.type
     responseStudentId.value = submission.student_id
 
-    // Set visible fields based on anonymous status
     if (isAnonymous) {
       if (responseStudentName) responseStudentName.textContent = "Anonymous Student"
       if (responseStudentEmail) responseStudentEmail.value = "(Anonymous - No email)"
@@ -424,17 +539,14 @@ function openResponseModal(submission) {
       }
     }
 
-    // Clear message and reset counter
     if (responseMessage) responseMessage.value = ""
     if (charCount) charCount.textContent = "0"
 
-    // Show modal
     if (responseModal) {
       responseModal.show()
     }
   } catch (error) {
-    console.error("Error in openResponseModal:", error)
-    showAlert("error", "Error", "Error opening response modal: " + error.message)
+    showAlert("error", "Error", "Error opening response modal")
   }
 }
 
@@ -442,7 +554,6 @@ function updateStatus(submissionId, type, currentStatusId) {
   try {
     const currentStatus = Number.parseInt(currentStatusId)
 
-    // Check if status is final (Resolved or Rejected)
     if (currentStatus === 3 || currentStatus === 4) {
       showAlert(
         "info",
@@ -471,7 +582,6 @@ function updateStatus(submissionId, type, currentStatusId) {
       currentStatusDisplay.value = STATUS_NAMES[currentStatus] || "Unknown"
     }
 
-    // Populate dropdown with only valid next statuses
     const allowedStatuses = STATUS_FLOW[currentStatus] || []
     let optionsHTML = '<option value="">-- Select Status --</option>'
 
@@ -482,7 +592,6 @@ function updateStatus(submissionId, type, currentStatusId) {
     newStatusSelect.innerHTML = optionsHTML
     newStatusSelect.value = ""
 
-    // Update alert message based on current status
     const statusAlertDiv = document.querySelector("#statusModal .alert")
     if (statusAlertDiv) {
       if (currentStatus === 1) {
@@ -500,8 +609,7 @@ function updateStatus(submissionId, type, currentStatusId) {
       statusModal.show()
     }
   } catch (error) {
-    console.error("Error in updateStatus:", error)
-    showAlert("error", "Error", "Error opening status modal: " + error.message)
+    showAlert("error", "Error", "Error opening status modal")
   }
 }
 
@@ -562,8 +670,7 @@ function submitResponse(event) {
       }
     })
     .catch((error) => {
-      console.error("Error:", error)
-      showAlert("error", "Connection Error!", "Failed to connect to server: " + error.message)
+      showAlert("error", "Connection Error!", "Failed to connect to server")
     })
 }
 
@@ -583,7 +690,6 @@ function confirmStatusUpdate(event) {
   const currentStatus = Number.parseInt(currentStatusId)
   const newStatus = Number.parseInt(newStatusId)
 
-  // Validate status flow
   const allowedStatuses = STATUS_FLOW[currentStatus] || []
   if (!allowedStatuses.includes(newStatus)) {
     showAlert(
@@ -629,12 +735,12 @@ function confirmStatusUpdate(event) {
       }
     })
     .catch((error) => {
-      console.error("Error:", error)
-      showAlert("error", "Connection Error!", "Failed to connect to server: " + error.message)
+      showAlert("error", "Connection Error!", "Failed to connect to server")
     })
 }
 
 function escapeHtml(text) {
+  if (!text) return ''
   const map = {
     "&": "&amp;",
     "<": "&lt;",
@@ -642,10 +748,9 @@ function escapeHtml(text) {
     '"': "&quot;",
     "'": "&#039;",
   }
-  return text.replace(/[&<>"']/g, (m) => map[m])
+  return String(text).replace(/[&<>"']/g, (m) => map[m])
 }
 
-// Helper function for alerts
 function showAlert(icon, title, text) {
   if (Swal) {
     return Swal.fire({
@@ -660,7 +765,6 @@ function showAlert(icon, title, text) {
   }
 }
 
-// Helper function for loading alerts
 function showLoadingAlert(title, text) {
   if (Swal) {
     Swal.fire({

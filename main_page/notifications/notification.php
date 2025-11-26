@@ -71,7 +71,7 @@ function getNotificationAttributes($notif) {
         <div class="notifications-header">
             <div>
                 <h1>
-                    <i class="bi bi-bell-fill" style="color: rgba(239, 68, 68, 0.6);"></i>
+                    <i class="bi bi-bell-fill notification-bell-icon"></i>
                     Notifications
                     <?php if ($unreadCount > 0): ?>
                         <span class="badge-unread"><?= $unreadCount ?></span>

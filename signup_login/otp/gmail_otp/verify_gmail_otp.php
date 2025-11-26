@@ -4,6 +4,7 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/../../../db.php';
 require_once __DIR__ . '/../../classes/ActivityLogger.php';
+require_once __DIR__ . '/../../classes/AdminAuthService.php';
 
 $database = new Database();
 $conn = $database->getConnection();
@@ -28,8 +29,6 @@ if (!preg_match('/^\d{6}$/', $otp_input)) {
 
 $auth_user = $_SESSION['authUser'];
 $is_admin = $_SESSION['is_admin'] ?? false;
-
-$_SESSION['admin_role'] = $_SESSION['admin_role'] ?? $auth_user;
 
 if ($is_admin) {
     $stmt = $conn->prepare("
@@ -68,18 +67,63 @@ if (strtotime($otp_record['expires_at']) < time()) {
 }
 
 if (trim($otp_record['otp_code']) !== trim($otp_input)) {
-    error_log("[verify_gmail_otp] OTP mismatch - DB: '" . $otp_record['otp_code'] . "' vs Input: '" . $otp_input . "'");
     echo json_encode(['status' => false, 'message' => 'Incorrect OTP. Please try again.']);
     exit;
 }
 
-// Set session variables
+// Set session variables properly for admin
 if ($is_admin) {
-    $_SESSION['admin_id'] = $auth_user;
-    $_SESSION['admin_logged_in'] = true;
-    $_SESSION['user_id'] = $auth_user;
-    $_SESSION['logged_in'] = true;
+    $admin_type = $_SESSION['admin_type'] ?? 'database_admin';
+    
+    if ($admin_type === 'super_admin') {
+        // Super Admin session setup
+        $_SESSION['admin_id'] = $auth_user;
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['user_id'] = $auth_user;
+        $_SESSION['logged_in'] = true;
+        $_SESSION['admin_role'] = 'super_admin';
+        $_SESSION['first_name'] = $_SESSION['first_name'] ?? 'Super Administrator';
+    } else {
+        // SSC Admin - Get full admin details from database
+        $adminAuth = new AdminAuthService();
+        $adminInfo = $adminAuth->getAdminContactInfo($auth_user);
+        
+        if (!$adminInfo) {
+            echo json_encode(['status' => false, 'message' => 'Admin account not found']);
+            exit;
+        }
+        
+        // Get admin ID from database
+        $stmt = $conn->prepare("
+            SELECT admin_id, name, email, role 
+            FROM admin 
+            WHERE LOWER(email) = LOWER(?) AND admin_id != 1 
+            LIMIT 1
+        ");
+        $stmt->bind_param("s", $auth_user);
+        $stmt->execute();
+        $admin_result = $stmt->get_result();
+        
+        if ($admin_result->num_rows === 0) {
+            $stmt->close();
+            echo json_encode(['status' => false, 'message' => 'Admin account not found in database']);
+            exit;
+        }
+        
+        $admin_data = $admin_result->fetch_assoc();
+        $stmt->close();
+        
+        // Set complete session for SSC Admin
+        $_SESSION['admin_id'] = $admin_data['admin_id'];
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['user_id'] = $auth_user;
+        $_SESSION['logged_in'] = true;
+        $_SESSION['admin_role'] = 'ssc_admin';
+        $_SESSION['admin_type'] = 'database_admin';
+        $_SESSION['first_name'] = $admin_data['name'];
+    }
 } else {
+    // Student session setup
     $_SESSION['user_id'] = $auth_user;
     $_SESSION['logged_in'] = true;
 }
@@ -87,7 +131,13 @@ if ($is_admin) {
 // Log the successful login activity
 $activityLogger = new ActivityLogger();
 $user_type = $is_admin ? 'admin' : 'student';
-$activityLogger->logLogin($auth_user, $user_type, 'Gmail OTP');
+
+// For admin, log using email instead of admin_id to properly identify SSC Admins
+if ($is_admin) {
+    $activityLogger->logLogin($auth_user, $user_type, 'Gmail OTP');
+} else {
+    $activityLogger->logLogin($auth_user, $user_type, 'Gmail OTP');
+}
 
 // Delete used OTP
 $delete_stmt = $conn->prepare("DELETE FROM otp_verifications WHERE id = ?");
@@ -111,8 +161,6 @@ if ($is_admin) {
 } else {
     $redirect_url = "$protocol://$host$base_path/main_page/homepage.php";
 }
-
-error_log("[verify_gmail_otp] Redirect URL: $redirect_url");
 
 echo json_encode([
     'status' => true,

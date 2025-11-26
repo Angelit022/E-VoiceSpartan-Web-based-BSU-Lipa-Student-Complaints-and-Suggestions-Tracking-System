@@ -1,3 +1,19 @@
+/* ===== PAGE HEADER - RED COLOR ===== */
+.container-fluid h2 {
+  color: #dc3545 !important;
+  font-weight: 700;
+}
+
+.container-fluid h2 i {
+  color: #dc3545 !important;
+}
+
+.container-fluid .text-muted {
+  color: #6c757d !important;
+}
+
+/* ===== FEEDBACK PAGE STYLES ===== */
+
 .progress {
   border-radius: 10px;
   overflow: hidden;

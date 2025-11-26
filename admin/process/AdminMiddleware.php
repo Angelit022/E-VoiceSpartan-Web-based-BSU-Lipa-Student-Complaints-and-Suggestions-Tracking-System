@@ -17,12 +17,29 @@ $admin_name = $_SESSION['first_name'] ?? 'Admin';
 $admin_email = $_SESSION['authUser'] ?? null;
 $admin_type = $_SESSION['admin_type'] ?? null;
 
+// Store the email in user_id for activity logging purposes
+if ($admin_email && !isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = $admin_email;
+}
+
 // Check if admin is active (only for database admins, not super admin)
 if ($admin_type === 'database_admin' && $admin_id) {
     $database = new Database();
     $db = $database->getConnection();
     
-    $stmt = $db->prepare("SELECT is_active FROM admin WHERE admin_id = ? LIMIT 1");
+    if (!$db) {
+        session_destroy();
+        header('Location: ../../signup_login/login.php?message=' . urlencode('Database connection error'));
+        exit;
+    }
+    
+    $stmt = $db->prepare("SELECT is_active, name, role FROM admin WHERE admin_id = ? LIMIT 1");
+    if (!$stmt) {
+        session_destroy();
+        header('Location: ../../signup_login/login.php?message=' . urlencode('Database error'));
+        exit;
+    }
+    
     $stmt->bind_param("i", $admin_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -31,6 +48,16 @@ if ($admin_type === 'database_admin' && $admin_id) {
         $admin = $result->fetch_assoc();
         $stmt->close();
         
+        // Update session with correct role if needed
+        if ($admin['role'] === 'ssc_admin' && $_SESSION['admin_role'] !== 'ssc_admin') {
+            $_SESSION['admin_role'] = 'ssc_admin';
+        }
+        
+        // Update name if needed
+        if (!empty($admin['name']) && $_SESSION['first_name'] !== $admin['name']) {
+            $_SESSION['first_name'] = $admin['name'];
+        }
+        
         // If admin is inactive, logout and redirect
         if ($admin['is_active'] != 1) {
             session_destroy();
@@ -38,11 +65,40 @@ if ($admin_type === 'database_admin' && $admin_id) {
             exit;
         }
     } else {
-        // Admin not found in database
+        // Admin not found in database - Try to find by email as fallback
         $stmt->close();
-        session_destroy();
-        header('Location: ../../signup_login/login.php?message=' . urlencode('Admin account not found.'));
-        exit;
+        
+        if ($admin_email) {
+            $stmt = $db->prepare("SELECT admin_id, name, role, is_active FROM admin WHERE LOWER(email) = LOWER(?) AND admin_id != 1 LIMIT 1");
+            $stmt->bind_param("s", $admin_email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $admin = $result->fetch_assoc();
+                $stmt->close();
+                
+                // Update session with correct admin_id
+                $_SESSION['admin_id'] = $admin['admin_id'];
+                $_SESSION['admin_role'] = $admin['role'] === 'ssc_admin' ? 'ssc_admin' : 'ssc_admin';
+                $_SESSION['first_name'] = $admin['name'];
+                
+                if ($admin['is_active'] != 1) {
+                    session_destroy();
+                    header('Location: ../../signup_login/login.php?message=' . urlencode('Your account has been deactivated. Please contact Super Admin.'));
+                    exit;
+                }
+            } else {
+                $stmt->close();
+                session_destroy();
+                header('Location: ../../signup_login/login.php?message=' . urlencode('Admin account not found.'));
+                exit;
+            }
+        } else {
+            session_destroy();
+            header('Location: ../../signup_login/login.php?message=' . urlencode('Admin account not found.'));
+            exit;
+        }
     }
 }
 

@@ -6,9 +6,10 @@ require_once __DIR__ . '/../classes/AdminActivityLog.php';
 // Initialize activity logger
 $adminId = $_SESSION['admin_id'] ?? null;
 $adminName = $_SESSION['first_name'] ?? 'Admin';
+$adminEmail = $_SESSION['authUser'] ?? null; // Get admin email
 
-if ($adminId) {
-    $activityLog = new AdminActivityLog($adminId, $adminName);
+if ($adminId && $adminEmail) {
+    $activityLog = new AdminActivityLog($adminId, $adminName, $adminEmail);
     
     // Only log export action, not the page view
     if (isset($_GET['export']) && $_GET['export'] === 'csv') {

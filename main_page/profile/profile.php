@@ -266,15 +266,17 @@ $responseType = isset($_GET['type']) ? $_GET['type'] : '';
                         </button>
                       <?php elseif ($sub['status'] === 'Resolved'): ?>
                         <?php if ($hasResponses): ?>
-                          <button class="btn-view-response btn btn-outline-success unread" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
+                          <button class="btn-view-response btn btn-outline-success" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
                             <i class="bi bi-envelope-open"></i>
                           </button>
                         <?php endif; ?>
-                        <button class="btn btn-outline-warning btn-feedback" type="button" onclick="openFeedbackModal(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>', '<?php echo htmlspecialchars(addslashes($sub['title'])); ?>')" title="Rate your experience">
+                        <button class="btn btn-outline-warning btn-feedback" type="button" 
+                                onclick="openFeedbackModal(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>', '<?php echo htmlspecialchars(addslashes($sub['title'])); ?>');" 
+                                title="Rate your experience">
                           <i class="bi bi-star-fill"></i>
                         </button>
                       <?php elseif ($hasResponses): ?>
-                        <button class="btn-view-response btn btn-outline-success unread" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
+                        <button class="btn-view-response btn btn-outline-success" type="button" onclick="viewResponses(<?php echo $sub['id']; ?>, '<?php echo strtolower($sub['type']); ?>')">
                           <i class="bi bi-envelope-open"></i>
                         </button>
                       <?php endif; ?>

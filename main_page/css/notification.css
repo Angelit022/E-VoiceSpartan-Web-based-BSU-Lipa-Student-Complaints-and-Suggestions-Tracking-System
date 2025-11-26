@@ -32,8 +32,13 @@ body {
     gap: 0.75rem;
 }
 
+/* CRITICAL FIX: Bell Icon Color - Force Red */
 .notifications-header h1 i {
-    color: rgba(246, 59, 59, 0.7);
+    color: #f63b3b !important;
+}
+
+.notification-bell-icon {
+    color: #f63b3b !important;
 }
 
 .notifications-actions {
@@ -68,8 +73,6 @@ body {
     border-color: #2563eb;
     transform: translateY(0);
 }
-
-
 
 /* Updated Badge Unread - Red */
 .badge-unread {

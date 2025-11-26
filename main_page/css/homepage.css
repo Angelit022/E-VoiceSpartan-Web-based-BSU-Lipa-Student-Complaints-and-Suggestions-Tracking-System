@@ -65,7 +65,7 @@
   margin-bottom: 1.5rem;
   letter-spacing: -2px;
   line-height: 1.1;
-  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.12);
+  text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.21);
   animation: fadeInUp 1s ease-out 0.2s both;
   width: 100%;
 }
@@ -746,7 +746,7 @@
 
 @media (max-width: 576px) {
   .hero-title {
-    font-size: 2.2rem;
+    font-size: 1rem !important;
     letter-spacing: -1px;
   }
 

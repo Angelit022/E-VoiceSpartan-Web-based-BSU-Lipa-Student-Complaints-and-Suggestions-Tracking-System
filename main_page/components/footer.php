@@ -83,7 +83,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="./../images/vata.jpg"; 
+                <img src="../images/vata.jpg"; 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Angelito Gonzales</h6>
@@ -96,7 +96,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="./../images/angelica.jpg" 
+                <img src="../images/angelica.jpg" 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Angelica Ramirez</h6>
@@ -109,7 +109,7 @@
           <div class="col-lg-4 col-md-6">
             <div class="team-card text-center h-100">
               <div class="team-img-wrapper mb-3">
-                <img src="./../images/klyza.jpg" 
+                <img src="../images/klyza.jpg" 
                      alt="Team Member" class="team-img rounded-circle">
               </div>
               <h6 class="fw-bold mb-1">Klyza Mae Medrazo</h6>

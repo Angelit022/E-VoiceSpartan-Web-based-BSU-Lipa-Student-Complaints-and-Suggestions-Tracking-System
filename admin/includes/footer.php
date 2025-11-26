@@ -6,8 +6,9 @@
                 <div class="col-12 col-md-4 text-center text-md-start mb-3 mb-md-0">
                     <div class="d-flex align-items-center justify-content-center justify-content-md-start">
                         <div class="footer-logo me-2">
-                            <i class="bi bi-megaphone-fill"></i>
+                            <img src="../../images/LOGO.png" alt="E-VoiceSpartan Logo" class="footer-logo-img">
                         </div>
+
                         <div>
                             <h6 class="mb-0 fw-bold text-white">E-VoiceSpartan</h6>
                             <small class="text-white-50">Admin Dashboard</small>
@@ -59,20 +60,25 @@
 }
 
 .footer-logo {
-    width: 40px;
-    height: 40px;
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    width: 45px;
+    height: 45px;
     border-radius: 10px;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
-.footer-logo i {
-    font-size: 1.25rem;
-    color: white;
+.footer-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+    mix-blend-mode: multiply;
 }
+
 
 .admin-footer .badge {
     font-weight: 500;
