@@ -1,0 +1,179 @@
+Installation Guide
+
+Prerequisites
+-------------------------------------------------------------------------------
+1. XAMPP v8.0 or higher (Apache + MySQL)
+2. Web Browser (Chrome/Firefox/Edge)
+3. Internet connection for email/SMS/Google login features
+
+Step-by-Step Installation
+--------------------------------------------------------------------------------
+1. XAMPP Setup
+- Download XAMPP v8.0+ from https://www.apachefriends.org
+- Run installer and follow prompts
+- Install to default location (C:\xampp)
+
+2. Database Setup
+- Start XAMPP Control Panel
+- Start Apache and MySQL services
+- Open browser: http://localhost/phpmyadmin
+- Create new database:
+  * Name: e_voicespartan (or your preferred name for db)
+  * Collation: utf8mb4_general_ci
+- If you have an SQL dump, click 'Import' tab and import it
+
+3. Project Files Setup
+- Navigate to C:\xampp\htdocs
+- Create a new folder: E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System
+- Extract all project files to this folder
+- Verify folder structure:
+  * C:\xampp\htdocs\E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System\
+  * C:\xampp\htdocs\E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System\admin\
+  * C:\xampp\htdocs\E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System\main_page\
+  * C:\xampp\htdocs\E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System\signup_login\
+  * C:\xampp\htdocs\E-VoiceSpartan Web-based BSU Lipa Student Complaints and Suggestions Tracking System\uploads\
+
+4. Configure Database Connection
+- Open file: db.php
+- Update credentials accordingly:
+  host: localhost
+  user: root (or your DB user)
+  password: "" (blank by default in XAMPP)
+  database: evoicespartan_db
+- Save the file
+
+5. Configure Email/SMS/Google (optional but recommended)
+- Email (SMTP):
+  * File: signup_login/otp/gmail_otp/gmail_config.php
+  * File: admin/notif/EmailHandler.php
+  * Provide SMTP host, port, username, and app password
+- SMS:
+  * Files: signup_login/otp/sms_otp/send_sms_otp.php, verify_sms_otp.php
+  * File: admin/notif/SMSHandler.php
+  * Provide provider credentials/API keys
+- Google Sign-In:
+  * Files: signup_login/classes/GoogleAuthService.php, google-callback.php
+  * Set Google Client ID/Secret and Redirect URI
+
+6. Access the System
+- Ensure Apache & MySQL are running
+- Open browser
+- Go to: http://localhost/E-VoiceSpartan%20Web-based%20BSU%20Lipa%20Student%20Complaints%20and%20Suggestions%20Tracking%20System
+
+Login Credentials
+-------------------------------------------------------------------------------
+Note: Replace placeholders with real seeded accounts from your database if available.
+
+1. Admin Account (Sample/Test):
+- Email: superadmin@g.batstate-u.edu.ph
+- Password: admin123
+- Role: Super Administrator
+- Access: Dashboard, feedback/responses management, activity logs,Admin Management, settings
+
+2. Student Account (Sample/Test):
+- Email: 23-36439@g.batstate-u.edu.ph
+- Password: B@ta54321
+- Role: Student
+- Access: Submit complaints/suggestions, view responses, notifications, profile, settings
+
+Access Points
+--------------------------------------------------------------------------------
+1. Student Portal:
+- URL: http://localhost/E-VoiceSpartan%20Web-based%20BSU%20Lipa%20Student%20Complaints%20and%20Suggestions%20Tracking%20System/main_page/homepage.php
+- Features: Submission forms, profile, notifications, settings
+
+2. Admin Dashboard:
+- URL: http://localhost/E-VoiceSpartan%20Web-based%20BSU%20Lipa%20Student%20Complaints%20and%20Suggestions%20Tracking%20System/admin/pages/dashboard.php
+- Features: Analytics, manage complaints/suggestions, responses, activity logs
+
+3. Authentication:
+- Login: http://localhost/E-VoiceSpartan%20Web-based%20BSU%20Lipa%20Student%20Complaints%20and%20Suggestions%20Tracking%20System/signup_login/login.php
+- Signup: http://localhost/E-VoiceSpartan%20Web-based%20BSU%20Lipa%20Student%20Complaints%20and%20Suggestions%20Tracking%20System/signup_login/signup.php
+
+System Features
+---------------------------------------------------------------------------------
+1. Student Panel:
+- Submit Complaints: main_page/complaint/complaint.php
+- Submit Suggestions: main_page/suggestion/suggestion.php
+- View Responses & Feedback: main_page/profile/response.php, feedback.php
+- Manage Submissions: view/edit/delete submissions in main_page/profile/
+- Notifications: main_page/notifications/notification.php
+- Profile & Settings: main_page/profile/profile.php, main_page/settings/settings.php
+
+2. Admin Panel:
+- Analytic Dashboard: admin/pages/dashboard.php (DashboardService.php)
+- Manage Complaints/Suggestions: admin/pages/feedback.php, responses.php
+- Respond to Submissions: admin/notif/process_response.php (with Email/SMS)
+- Activity Logs: admin/pages/activity_log.php (ActivityLogService.php)
+- Admin Profile/Settings: admin/pages/profile.php, settings.php
+
+3. Notifications & OTP:
+- Email/SMS Notifications: admin/notif/EmailHandler.php, SMSHandler.php
+- Student Notifications Manager: main_page/classes/NotificationManager.php
+- OTP (Email/SMS) for signup/login verification: signup_login/otp/
+
+Common Issues & Solutions
+----------------------------------------------------------------------------------
+1. Database Connection Error
+- Verify in db.php:
+  host: "localhost"
+  user: "root"
+  password: ""
+  database: "evoicespartan_db"
+- Check XAMPP services (Apache, MySQL) are running
+- Verify database exists in phpMyAdmin
+
+2. Upload Not Working
+- Check folder permissions: uploads/ and subfolders
+- Verify PHP settings in php.ini (increase if needed):
+  * upload_max_filesize = 10M
+  * post_max_size = 12M
+  * max_execution_time = 300
+  * max_input_time = 300
+- Restrict executable uploads (consider .htaccess to deny PHP execution in uploads on production)
+
+3. Email Not Sending
+- Confirm internet connection
+- Validate SMTP settings in:
+  * signup_login/otp/gmail_otp/gmail_config.php
+  * admin/notif/EmailHandler.php
+- Use app password for accounts with 2FA
+- Check firewall/ISP SMTP port restrictions (e.g., 465/587)
+
+4. SMS Not Sending
+- Verify provider API keys in signup_login/otp/sms_otp/ and admin/notif/SMSHandler.php
+- Check provider dashboard for delivery status and sender IDs
+
+5. Google Login Not Working
+- Ensure correct Client ID/Secret and redirect URI in Google console and in google-callback.php
+- Verify authorized JavaScript origins and redirect URIs
+
+6. Blank Page or 500 Error
+- Enable error display in development (php.ini: display_errors=On)
+- Check Apache/PHP error logs
+- Confirm required PHP extensions (mbstring, intl, openssl) are enabled
+
+Configuration Files Summary
+----------------------------------------------------------------------------------
+- Database: db.php
+- Email (SMTP): signup_login/otp/gmail_otp/gmail_config.php, admin/notif/EmailHandler.php
+- SMS: signup_login/otp/sms_otp/*.php, admin/notif/SMSHandler.php
+- Google Auth: signup_login/classes/GoogleAuthService.php, google-callback.php
+
+Version Information
+----------------------------------------------------------------------------------
+Version: 1.0.0
+Release Date: December 2025
+Last Updated: December 2025
+
+Contact & Support
+---------------------------------------------------------------------------------
+For technical assistance:
+Email: bot01200501@gmail.com
+
+-------------------------------------------------------------------------------------------------
+E-VoiceSpartan Team Members
+---------------------------------------------------------------------------------
+Gonzales, Angelito B.
+Ramirez, Angelica P.
+Medrazo, Klyza
