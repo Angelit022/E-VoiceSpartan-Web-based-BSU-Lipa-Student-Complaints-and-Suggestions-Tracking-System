@@ -1,0 +1,170 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header("Location: ../../signup_login/login.php");
+    exit();
+}
+
+require_once '../../db.php';
+require_once '../classes/SettingsManager.php';
+require_once '../classes/NotificationManager.php';
+
+$settingsManager = new SettingsManager($_SESSION['user_id']);
+$student = $settingsManager->getStudentInfo();
+
+$notificationManager = new NotificationManager($_SESSION['user_id']);
+$notificationPrefs = $notificationManager->getPreferences();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - E-VoiceSpartan</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="../css/global-theme.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/settings.css">
+    <link rel="stylesheet" href="../css/navbar.css">
+</head>
+<body>
+    <?php include '../components/navbar.php'; ?>
+
+    <div class="settings-header">
+        <div class="settings-container">
+            <h1 data-translate="settings"><i class="bi bi-gear"></i> Settings</h1>
+            <p data-translate="manageAccount">Manage your account, notifications, privacy, and preferences</p>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <div class="settings-tabs">
+            <button class="settings-tab active" onclick="switchTab('account')">
+                <i class="bi bi-person"></i> <span data-translate="account">Account</span>
+            </button>
+            <button class="settings-tab" onclick="switchTab('notifications')">
+                <i class="bi bi-bell"></i> <span data-translate="notifications">Notifications</span>
+            </button>
+            <button class="settings-tab" onclick="switchTab('privacy')">
+                <i class="bi bi-shield-lock"></i> <span data-translate="privacy">Privacy</span>
+            </button>
+        </div>
+
+        <div id="account" class="settings-panel active">
+            <div class="panel-header">
+                <h2><i class="bi bi-person-circle"></i> <span data-translate="accountInfo">Account Information</span></h2>
+                <p data-translate="updatePersonal">Update your personal information</p>
+            </div>
+            <div class="success-message" id="account-success"></div>
+            <div class="error-message" id="account-error"></div>
+            <form id="account-form" onsubmit="handleAccountSubmit(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName"><span data-translate="firstName">First Name</span></label>
+                        <input type="text" id="firstName" name="firstName" value="<?= htmlspecialchars($student['first_name'] ?? '') ?>" readonly disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName"><span data-translate="lastName">Last Name</span></label>
+                        <input type="text" id="lastName" name="lastName" value="<?= htmlspecialchars($student['last_name'] ?? '') ?>" readonly disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"><span data-translate="email">Email Address</span></label>
+                        <input type="email" id="email" name="email" value="<?= htmlspecialchars($student['email'] ?? '') ?>" readonly disabled style="background-color: #f5f5f5; cursor: not-allowed;">
+                    </div>
+                    <div class="form-group">
+                        <label for="phoneNumber">
+                            <span data-translate="phoneNumber">Mobile Number</span> 
+                            <i class="bi bi-pencil-fill" style="color: #c41e3a; font-size: 0.875rem; margin-left: 0.25rem;" title="Editable"></i>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="phoneNumber" 
+                            name="phoneNumber" 
+                            value="<?= htmlspecialchars($student['phone_number'] ?? '') ?>"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            maxlength="11"
+                            placeholder="09XXXXXXXXX"
+                            required>
+                        <small class="form-text" style="color: var(--text-secondary); display: block; margin-top: 0.25rem;">
+                            Format: 09XXXXXXXXX (11 digits starting with 09)
+                        </small>
+                    </div>
+                </div>
+                <div class="alert alert-info" style="display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.75rem; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+                    <i class="bi bi-info-circle" style="font-size: 1.25rem; color: #2196f3;"></i>
+                    <span style="font-size: 0.875rem; color: #1976d2;">
+                        <strong>Note:</strong> Name and Email are fixed and linked to your GSuite account.
+                    </span>
+                </div>
+                <button type="submit" class="btn-save" style="margin-top: 1.5rem;">
+                    <i class="bi bi-check-circle"></i> <span data-translate="saveChanges">Update Mobile Number</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="notifications" class="settings-panel">
+            <div class="panel-header">
+                <h2><i class="bi bi-bell"></i> <span data-translate="notificationPrefs">Notification Preferences</span></h2>
+                <p data-translate="chooseUpdates">Choose how you want to receive updates</p>
+            </div>
+            <div class="success-message" id="notif-success"></div>
+            <div class="error-message" id="notif-error"></div>
+            <form id="notifications-form" onsubmit="handleNotificationsSubmit(event)">
+                <div class="form-check">
+                    <input type="checkbox" id="viaEmail" name="viaEmail" class="form-check-input" <?= $notificationPrefs['via_email'] ? 'checked' : '' ?>>
+                    <label for="viaEmail" class="form-check-label" data-translate="emailNotifications">Email Notifications</label>
+                </div>
+                <p class="form-check-description" data-translate="receiveVia">Receive notifications and updates via email, sms, or both</p>
+
+                <div class="form-check">
+                    <input type="checkbox" id="viaSms" name="viaSms" class="form-check-input" <?= $notificationPrefs['via_sms'] ? 'checked' : '' ?>>
+                    <label for="viaSms" class="form-check-label" data-translate="smsNotifications">SMS Notifications</label>
+                </div>
+
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-check-circle"></i> <span data-translate="savePreferences">Save Preferences</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="privacy" class="settings-panel">
+            <div class="panel-header">
+                <h2><i class="bi bi-shield-lock"></i> <span data-translate="changePassword">Change Password</span></h2>
+                <p data-translate="keepSecure">Update your password to keep your account secure</p>
+            </div>
+            <div class="success-message" id="password-success"></div>
+            <div class="error-message" id="password-error"></div>
+            <form id="password-form" onsubmit="handlePasswordSubmit(event)">
+                <div class="form-group">
+                    <label for="currentPassword"><span data-translate="currentPassword">Current Password</span> <span style="color: var(--color-red);">*</span></label>
+                    <input type="password" id="currentPassword" name="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword"><span data-translate="newPassword">New Password</span> <span style="color: var(--color-red);">*</span></label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword"><span data-translate="confirmPassword">Confirm New Password</span> <span style="color: var(--color-red);">*</span></label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                <button type="submit" class="btn-save">
+                    <i class="bi bi-key"></i> <span data-translate="updatePassword">Update Password</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <?php include '../components/footer.php'; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <script src="../js/settings.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+</html>

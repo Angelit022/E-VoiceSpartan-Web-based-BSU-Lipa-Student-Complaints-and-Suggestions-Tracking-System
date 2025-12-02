@@ -1,0 +1,701 @@
+.container-fluid h2 {
+  color: #dc3545 !important;
+  font-weight: 700;
+}
+
+.container-fluid h2 i {
+  color: #dc3545 !important;
+}
+
+.container-fluid .text-muted {
+  color: #6c757d !important;
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 50%;
+  transform: translate(30%, -30%);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-card h3 {
+  font-weight: 800;
+  font-size: 2.5rem;
+  margin-bottom: 0;
+}
+
+.stat-card h6 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .text-danger {
+  color: #dc3545;
+}
+
+.stat-card .text-primary {
+  color: #0d6efd;
+}
+
+.stat-card .text-warning {
+  color: #ffc107;
+}
+
+.stat-card .text-success {
+  color: #198754;
+}
+
+.card {
+  overflow: hidden;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+.card-header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1rem 1.25rem;
+}
+
+.card-header h6 {
+  color: #212529;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.card-body {
+  overflow: hidden;
+  background-color: #ffffff;
+  padding: 1.5rem;
+}
+
+.card-footer {
+  background-color: #f8f9fa !important;
+  border-top: 1px solid #e0e0e0;
+  padding: 0.875rem 1.25rem;
+}
+
+.card[style*="border-left: 4px solid #FF8C00"] {
+  background: linear-gradient(135deg, #ff8c00 0%, #ff7700 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #FF8C00"] .card-body {
+  background: linear-gradient(135deg, rgba(255, 140, 0, 0.95) 0%, rgba(255, 119, 0, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #FF8C00"] h6,
+.card[style*="border-left: 4px solid #FF8C00"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left: 4px solid #0d6efd"] {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #0d6efd"] .card-body {
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.95) 0%, rgba(10, 88, 202, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #0d6efd"] h6,
+.card[style*="border-left: 4px solid #0d6efd"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left: 4px solid #FFEB3B"] {
+  background: linear-gradient(135deg, #f9a825 0%, #e89a1c 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #FFEB3B"] .card-body {
+  background: linear-gradient(135deg, rgba(249, 168, 37, 0.95) 0%, rgba(232, 154, 28, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #FFEB3B"] h6,
+.card[style*="border-left: 4px solid #FFEB3B"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left: 4px solid #64B5F6"] {
+  background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #64B5F6"] .card-body {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.95) 0%, rgba(13, 71, 161, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #64B5F6"] h6,
+.card[style*="border-left: 4px solid #64B5F6"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left: 4px solid #81C784"] {
+  background: linear-gradient(135deg, #388e3c 0%, #1b5e20 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #81C784"] .card-body {
+  background: linear-gradient(135deg, rgba(56, 142, 60, 0.95) 0%, rgba(27, 94, 32, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #81C784"] h6,
+.card[style*="border-left: 4px solid #81C784"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left: 4px solid #E57373"] {
+  background: linear-gradient(135deg, #d32f2f 0%, #b71c1c 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #E57373"] .card-body {
+  background: linear-gradient(135deg, rgba(211, 47, 47, 0.95) 0%, rgba(183, 28, 28, 0.95) 100%) !important;
+}
+
+.card[style*="border-left: 4px solid #E57373"] h6,
+.card[style*="border-left: 4px solid #E57373"] h3 {
+  color: #ffffff !important;
+}
+
+.card[style*="border-left"] .bi {
+  opacity: 0.25 !important;
+  color: #ffffff !important;
+}
+
+.card canvas {
+  display: block !important;
+}
+
+#trendChart {
+  height: 300px !important;
+  width: 100% !important;
+  display: block !important;
+  max-height: none !important;
+  position: relative !important;
+}
+
+.card-body:has(#trendChart) {
+  padding: 1.5rem !important;
+}
+
+.doughnut-wrapper {
+  height: 300px !important;
+  max-height: 300px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden !important;
+  padding: 1rem;
+}
+
+.doughnut-wrapper canvas {
+  max-height: 280px !important;
+  height: 280px !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.status-chart-container {
+  height: 200px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 1rem 0.5rem;
+}
+
+#complaintStatusChart,
+#suggestionStatusChart {
+  height: 100% !important;
+  width: 100% !important;
+  display: block !important;
+  max-height: none !important;
+  position: relative !important;
+}
+
+.table {
+  background-color: #ffffff;
+  margin-bottom: 0;
+  width: 100%;
+  min-width: 800px; 
+  display: table !important;
+}
+
+.table th,
+.table td {
+  display: table-cell !important; 
+  white-space: nowrap; 
+}
+
+.table thead {
+  background-color: #f8f9fa;
+}
+
+.table thead th {
+  color: #495057;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+  padding: 0.875rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table tbody td {
+  padding: 0.875rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+  background-color: #ffffff;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+  transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table-responsive {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  display: block;
+  width: 100%;
+  background-color: #ffffff;
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 10px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: #f8f9fa;
+  border-radius: 4px;
+  margin: 0 5px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+  background: #dc3545;
+  border-radius: 8px;
+  border: 2px solid #f8f9fa;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+  background: #bb2d3b;
+}
+
+.table-responsive {
+  scrollbar-color: #dc3545 #f8f9fa;
+  scrollbar-width: thin;
+}
+
+.badge {
+  font-weight: 500;
+  padding: 0.45em 0.75em;
+  font-size: 0.8rem;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Button Styling */
+.btn {
+  transition: all 0.2s ease;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+.dropdown-toggle {
+  background-color: #ffffff;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+}
+
+.dropdown-toggle:hover {
+  background-color: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+.dropdown-menu {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+.text-center.text-muted i {
+  color: #dee2e6;
+  font-size: 2rem;
+}
+
+.card-body:has(canvas) {
+  padding: 1.5rem !important;
+}
+
+.card-body h6.fw-bold {
+  margin-bottom: 1rem;
+  padding: 0;
+}
+
+
+@media (max-width: 575.98px) {
+  .stat-card h3 {
+    font-size: 1.5rem;
+  }
+
+  .stat-card h6 {
+    font-size: 0.7rem;
+  }
+
+  .stat-card i {
+    font-size: 1.75rem !important;
+  }
+
+  .stat-card::before {
+    width: 70px;
+    height: 70px;
+  }
+
+  #trendChart {
+    height: 250px !important;
+  }
+
+  .doughnut-wrapper {
+    height: 250px !important;
+    max-height: 250px !important;
+    padding: 0.5rem;
+  }
+
+  .doughnut-wrapper canvas {
+    max-height: 230px !important;
+    height: 230px !important;
+  }
+
+  .status-chart-container {
+    height: 180px !important;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .card-body {
+    padding: 1rem !important;
+  }
+
+  .card-header {
+    padding: 0.875rem 1rem;
+  }
+
+  .table {
+    font-size: 0.75rem;
+    min-width: 800px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    display: table-cell !important; 
+  }
+
+  .table th,
+  .table td {
+    display: table-cell !important;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  .table-responsive {
+    overflow-x: auto !important;
+    display: block;
+    width: 100%;
+    white-space: nowrap;
+  }
+
+  table {
+    min-width: 800px;
+  }
+}
+
+@media (min-width: 576px) and (max-width: 767.98px) {
+  .stat-card h3 {
+    font-size: 1.75rem;
+  }
+
+  .stat-card h6 {
+    font-size: 0.7rem;
+  }
+
+  .stat-card i {
+    font-size: 2rem !important;
+  }
+
+  .stat-card::before {
+    width: 80px;
+    height: 80px;
+  }
+
+  #trendChart {
+    height: 270px !important;
+  }
+
+  .doughnut-wrapper {
+    height: 270px !important;
+    max-height: 270px !important;
+    padding: 0.75rem;
+  }
+
+  .doughnut-wrapper canvas {
+    max-height: 250px !important;
+    height: 250px !important;
+  }
+
+  .status-chart-container {
+    height: 190px !important;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .card-body {
+    padding: 1.25rem !important;
+  }
+
+  .table {
+    font-size: 0.8rem;
+    min-width: 850px; 
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.6rem;
+    display: table-cell !important; 
+  }
+
+  .table th,
+  .table td {
+    display: table-cell !important;
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  .table-responsive {
+    overflow-x: auto !important;
+    display: block;
+    width: 100%;
+  }
+
+  table {
+    min-width: 850px;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .stat-card h3 {
+    font-size: 2rem;
+  }
+
+  .stat-card h6 {
+    font-size: 0.75rem;
+  }
+
+  .stat-card i {
+    font-size: 2.2rem !important;
+  }
+
+  #trendChart {
+    height: 280px !important;
+  }
+
+  .doughnut-wrapper {
+    height: 280px !important;
+    max-height: 280px !important;
+  }
+
+  .doughnut-wrapper canvas {
+    max-height: 260px !important;
+    height: 260px !important;
+  }
+
+  .status-chart-container {
+    height: 190px !important;
+  }
+
+  .card-body {
+    padding: 1.25rem !important;
+  }
+
+  .table {
+    font-size: 0.85rem;
+    min-width: 900px;
+  }
+
+  .table thead th,
+  .table tbody td {
+    display: table-cell !important; 
+  }
+
+  .table-responsive::-webkit-scrollbar {
+    height: 10px;
+  }
+
+  .table-responsive {
+    overflow-x: auto !important;
+    display: block;
+    width: 100%;
+  }
+
+  table {
+    min-width: 900px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .stat-card h3 {
+    font-size: 2.25rem;
+  }
+
+  #trendChart {
+    height: 300px !important;
+  }
+
+  .doughnut-wrapper {
+    height: 300px !important;
+    max-height: 300px !important;
+  }
+
+  .doughnut-wrapper canvas {
+    max-height: 280px !important;
+    height: 280px !important;
+  }
+
+  .status-chart-container {
+    height: 200px !important;
+  }
+
+  .card-body {
+    padding: 1.5rem !important;
+  }
+
+  .table {
+    min-width: 100%;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+
+@media (min-width: 1200px) {
+  .stat-card h3 {
+    font-size: 2.5rem;
+  }
+
+  #trendChart {
+    height: 300px !important;
+  }
+
+  .doughnut-wrapper {
+    height: 300px !important;
+    max-height: 300px !important;
+  }
+
+  .doughnut-wrapper canvas {
+    max-height: 280px !important;
+    height: 280px !important;
+  }
+
+  .status-chart-container {
+    height: 200px !important;
+  }
+
+  .card-body {
+    padding: 1.5rem !important;
+  }
+
+  .table {
+    min-width: 100%;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+}
+
+@media print {
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+
+  .btn,
+  .dropdown {
+    display: none !important;
+  }
+
+  .table-responsive {
+    overflow: visible !important;
+  }
+}
+
+.card,
+.btn,
+.badge,
+.table-hover tbody tr {
+  transition: all 0.2s ease;
+}
+
+.btn:focus {
+  outline: 2px solid #dc3545;
+  outline-offset: 2px;
+}
