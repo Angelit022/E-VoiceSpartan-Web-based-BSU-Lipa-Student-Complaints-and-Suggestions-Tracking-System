@@ -520,7 +520,7 @@ function openResponseModal(submission) {
     if (isAnonymous) {
       if (responseStudentName) responseStudentName.textContent = "Anonymous Student"
       if (responseStudentEmail) responseStudentEmail.value = "(Anonymous - No email)"
-      if (responseSubject) responseSubject.value = "Re: " + submission.title + " (Anonymous)"
+      if (responseSubject) responseSubject.value = "Title: " + submission.title + " (Anonymous)"
 
       if (alertDiv) {
         alertDiv.innerHTML =
@@ -530,7 +530,7 @@ function openResponseModal(submission) {
     } else {
       if (responseStudentName) responseStudentName.textContent = `${submission.first_name} ${submission.last_name}`
       if (responseStudentEmail) responseStudentEmail.value = submission.email
-      if (responseSubject) responseSubject.value = "Re: " + submission.title
+      if (responseSubject) responseSubject.value = "Title: " + submission.title
 
       if (alertDiv) {
         alertDiv.innerHTML = `<i class="bi bi-info-circle me-2"></i><strong>Responding to:</strong> ${submission.first_name} ${submission.last_name}`
